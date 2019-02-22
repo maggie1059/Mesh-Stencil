@@ -19,18 +19,22 @@ int main(int argc, char *argv[])
     parser.addPositionalArgument("infile", "Input .obj file path");
     parser.addPositionalArgument("outfile", "Output .obj file path");
     parser.addPositionalArgument("method", "subdivide/simplify/remesh/denoise");
-    parser.addPositionalArgument("args1", "respective argument for the method");
+
     //Subdivide: number of iterations
     //Simplify: number of faces to remove
     //Remesh: number of iterations
     //Denoise: number of iterations
-    parser.addPositionalArgument("args2", "respective argument2 for the method");
+    parser.addPositionalArgument("args1", "respective argument for the method");
+
     //Remesh: Tangential smoothing weight
     //Denoise: Smoothing parameter 1 (\Sigma_c)
-    parser.addPositionalArgument("args3", "respective argument3 for the method");
+    parser.addPositionalArgument("args2", "respective argument2 for the method");
+
     //Denoise: Smoothing parameter 2 (\Sigma_s)
-    parser.addPositionalArgument("args4", "respective argument4 for the method");
+    parser.addPositionalArgument("args3", "respective argument3 for the method");
+
     //Denoise: Kernel size (\rho)
+    parser.addPositionalArgument("args4", "respective argument4 for the method");
 
     parser.process(a);
 
