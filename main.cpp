@@ -14,21 +14,28 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
 
     ////////////////////////////////////////////////////////////////////////////////
-    // You will likely need to add more command line arguments here, e.g. to specify
-    //    which operation to perform on the input mesh.
     QCommandLineParser parser;
     parser.addHelpOption();
     parser.addPositionalArgument("infile", "Input .obj file path");
     parser.addPositionalArgument("outfile", "Output .obj file path");
-    parser.addPositionalArgument("method", "subdivide/simplify/remesh/denoising");
+    parser.addPositionalArgument("method", "subdivide/simplify/remesh/denoise");
     parser.addPositionalArgument("args1", "respective argument for the method");
+    //Subdivide: number of iterations
+    //Simplify: number of faces to remove
+    //Remesh: number of iterations
+    //Denoise: number of iterations
     parser.addPositionalArgument("args2", "respective argument2 for the method");
-    //TODO: list the options
+    //Remesh: Tangential smoothing weight
+    //Denoise: Smoothing parameter 1 (\Sigma_c)
+    parser.addPositionalArgument("args3", "respective argument3 for the method");
+    //Denoise: Smoothing parameter 2 (\Sigma_s)
+    parser.addPositionalArgument("args4", "respective argument4 for the method");
+    //Denoise: Kernel size (\rho)
 
     parser.process(a);
 
     const QStringList args = parser.positionalArguments();
-    if(args.size() < 4) {
+    if(args.size() < 3) {
         cerr << "Error: Wrong number of arguments" << endl;
         a.exit(1);
         return 1;
@@ -54,7 +61,7 @@ int main(int argc, char *argv[])
         //TODO
     } else if (method == "remesh"){
         //TODO
-    } else if (method == "denoising") {
+    } else if (method == "denoise") {
         //TODO
     } else {
         cerr << "Error: Unknown method name" << endl;
