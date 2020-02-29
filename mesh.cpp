@@ -19,10 +19,10 @@ void Mesh::initFromVectors(const std::vector<Vector3f> &vertices,
 {
     _vertices = vertices;
     _faces = faces;
-    _idkmap;
-    _lastmap;
+//    _idkmap;
+//    _lastmap;
 //    _vertmap;
-    _vertidx;
+//    _vertidx;
     _fun.reserve(2);
 }
 
@@ -71,11 +71,13 @@ void Mesh::loadFromFile(const std::string &filePath)
 void Mesh::convertToHE(){
     for (Vector3i face : _faces){
         int iv1 = face[0];
+        std::cout << "here" << std::endl;
         int iv2 = face[1];
         int iv3 = face[2];
         Vector3f v1 = _vertices[iv1];
         Vector3f v2 = _vertices[iv2];
         Vector3f v3 = _vertices[iv3];
+        std::cout << iv1 << std::endl;
 
         //take cross product, get normal, figure out orientation and swap verts if needed
         Vector3f AB = v2-v1;
@@ -101,7 +103,7 @@ void Mesh::convertToHE(){
         _halfedges.emplace(_halfedges.end(), HE{NULL, NULL, NULL, NULL, NULL});
         _halfedges.emplace(_halfedges.end(), HE{NULL, NULL, NULL, NULL, NULL});
         _halfedges.emplace(_halfedges.end(), HE{NULL, NULL, NULL, NULL, NULL});
-        _HEfaces.emplace(_HEfaces.end(), Face{&_halfedges[_halfedges.size()-3], face, normal};);
+        _HEfaces.emplace(_HEfaces.end(), Face{&_halfedges[_halfedges.size()-3], face, normal});
 
 //        Face f{&he1, face, normal};
 //        he1.face = &f;
@@ -116,9 +118,9 @@ void Mesh::convertToHE(){
 //        he2.next = &he3;
 //        he3.next = &he1;
 
-        _halfedges[_halfedges.size()-3].next = &_HEfaces[_HEfaces.size()-2];
-        _halfedges[_halfedges.size()-2].next = &_HEfaces[_HEfaces.size()-1];
-        _halfedges[_halfedges.size()-1].next = &_HEfaces[_HEfaces.size()-3];
+        _halfedges[_halfedges.size()-3].next = &_halfedges[_halfedges.size()-2];
+        _halfedges[_halfedges.size()-2].next = &_halfedges[_halfedges.size()-1];
+        _halfedges[_halfedges.size()-1].next = &_halfedges[_halfedges.size()-3];
 
         if (_idkmap.find(std::pair<int,int>(iv1, iv2)) == _idkmap.end() && _idkmap.find(std::pair<int,int>(iv2, iv1)) == _idkmap.end()){
 //            Edge e1{&he1, v1, v2};
@@ -130,72 +132,121 @@ void Mesh::convertToHE(){
             _halfedges[_halfedges.size()-3].edge = &_edges[_edges.size()-1];
             _idkmap[std::pair<int,int>(iv1, iv2)] = &_halfedges[_halfedges.size()-3];
         } else {
-            Edge *blah = _idkmap[std::pair<int,int>(iv2, iv1)]->edge;
-            he1.edge = blah;
+//            Edge *blah = _idkmap[std::pair<int,int>(iv2, iv1)]->edge;
+//            he1.edge = blah;
+
+            _halfedges[_halfedges.size()-3].edge = _idkmap[std::pair<int,int>(iv2, iv1)]->edge;
             _idkmap[std::pair<int,int>(iv1, iv2)] = &_halfedges[_halfedges.size()-3];
         }
 
         if (_vertidx.find(iv1) == _vertidx.end()){
-            Vertex v1_he{&he1, v1, 1, random_string()};
-            he1.vertex = &v1_he;
-            _HEverts.emplace_back(&v1_he);
-            _vertidx[iv1] = {1, &v1_he};
+//            Vertex v1_he{&he1, v1, 1, random_string()};
+//            he1.vertex = &v1_he;
+//            _HEverts.emplace_back(&v1_he);
+//            _vertidx[iv1] = {1, &v1_he};
+
+            _HEverts.emplace_back(Vertex{&_halfedges[_halfedges.size()-3], v1, 1, random_string()});
+            _halfedges[_halfedges.size()-3].vertex = &_HEverts[_HEverts.size()-1];
+            _vertidx[iv1] = {1, &_HEverts[_HEverts.size()-1]};
+            std::cout << "mhm " << iv1 << " " << _vertidx[iv1].vert->degree <<std::endl;
+
         } else {
+//            _vertidx[iv1].degree++;
+//            _vertidx[iv1].vert->degree = _vertidx[iv1].degree;
+//            he1.vertex = _vertidx[iv1].vert;
+
             _vertidx[iv1].degree++;
             _vertidx[iv1].vert->degree = _vertidx[iv1].degree;
-            he1.vertex = _vertidx[iv1].vert;
+            _halfedges[_halfedges.size()-3].vertex = &_HEverts[_HEverts.size()-1];
         }
 
         if (_idkmap.find(std::pair<int,int>(iv2, iv3)) == _idkmap.end() && _idkmap.find(std::pair<int,int>(iv3, iv2)) == _idkmap.end()){
-            Edge e2{&he2, v2, v3};
-            he2.edge = &e2;
-            _edges.emplace_back(&e2);
-            _idkmap[std::pair<int,int>(iv2, iv3)] = &he2;
+//            Edge e2{&he2, v2, v3};
+//            he2.edge = &e2;
+//            _edges.emplace_back(&e2);
+//            _idkmap[std::pair<int,int>(iv2, iv3)] = &he2;
+
+            _edges.emplace_back(Edge{&_halfedges[_halfedges.size()-2], v2, v3});
+            _halfedges[_halfedges.size()-2].edge = &_edges[_edges.size()-2];
+            _idkmap[std::pair<int,int>(iv2, iv3)] = &_halfedges[_halfedges.size()-2];
         } else {
-            Edge *blah = _idkmap[std::pair<int,int>(iv3, iv2)]->edge;
-            he2.edge = blah;
-            _idkmap[std::pair<int,int>(iv2, iv3)] = &he2;//blah;
+//            Edge *blah = _idkmap[std::pair<int,int>(iv3, iv2)]->edge;
+//            he2.edge = blah;
+//            _idkmap[std::pair<int,int>(iv2, iv3)] = &he2;
+
+            _halfedges[_halfedges.size()-2].edge = _idkmap[std::pair<int,int>(iv3, iv2)]->edge;
+            _idkmap[std::pair<int,int>(iv2, iv3)] = &_halfedges[_halfedges.size()-2];
         }
 
         if (_vertidx.find(iv2) == _vertidx.end()){
-            Vertex v2_he{&he2, v2, 1, random_string()};
-            he2.vertex = &v2_he;
-            _HEverts.emplace_back(&v2_he);
-            _vertidx[iv2] = {1, &v2_he};
+//            Vertex v2_he{&he2, v2, 1, random_string()};
+//            he2.vertex = &v2_he;
+//            _HEverts.emplace_back(&v2_he);
+//            _vertidx[iv2] = {1, &v2_he};
+
+            _HEverts.emplace_back(Vertex{&_halfedges[_halfedges.size()-2], v2, 1, random_string()});
+            _halfedges[_halfedges.size()-2].vertex = &_HEverts[_HEverts.size()-2];
+            _vertidx[iv2] = {1, &_HEverts[_HEverts.size()-2]};
         } else {
+//            _vertidx[iv2].degree++;
+//            _vertidx[iv2].vert->degree = _vertidx[iv2].degree;
+//            he2.vertex = _vertidx[iv2].vert;
+
             _vertidx[iv2].degree++;
             _vertidx[iv2].vert->degree = _vertidx[iv2].degree;
-            he2.vertex = _vertidx[iv2].vert;
+            _halfedges[_halfedges.size()-2].vertex = &_HEverts[_HEverts.size()-2];
         }
 
         if (_idkmap.find(std::pair<int,int>(iv3, iv1)) == _idkmap.end() && _idkmap.find(std::pair<int,int>(iv1, iv3)) == _idkmap.end()){
-            Edge e3{&he3, v3, v1};
-            he3.edge = &e3;
-            _edges.emplace_back(&e3);
-            _idkmap[std::pair<int,int>(iv3, iv1)] = &he3;
+//            Edge e3{&he3, v3, v1};
+//            he3.edge = &e3;
+//            _edges.emplace_back(&e3);
+//            _idkmap[std::pair<int,int>(iv3, iv1)] = &he3;
+
+            _edges.emplace_back(Edge{&_halfedges[_halfedges.size()-1], v3, v1});
+            _halfedges[_halfedges.size()-1].edge = &_edges[_edges.size()-1];
+            _idkmap[std::pair<int,int>(iv3, iv1)] = &_halfedges[_halfedges.size()-1];
         } else {
-            Edge *blah = _idkmap[std::pair<int,int>(iv1, iv3)]->edge;
-            he3.edge = blah;
-            _idkmap[std::pair<int,int>(iv3, iv1)] = &he3;//blah;
+//            Edge *blah = _idkmap[std::pair<int,int>(iv1, iv3)]->edge;
+//            he3.edge = blah;
+//            _idkmap[std::pair<int,int>(iv3, iv1)] = &he3;
+
+            _halfedges[_halfedges.size()-1].edge = _idkmap[std::pair<int,int>(iv1, iv3)]->edge;
+            _idkmap[std::pair<int,int>(iv3, iv1)] = &_halfedges[_halfedges.size()-1];
         }
 
         if (_vertidx.find(iv3) == _vertidx.end()){
-            Vertex v3_he{&he3, v3, 1, random_string()};
-            he3.vertex = &v3_he;
-            _HEverts.emplace_back(&v3_he);
-            _vertidx[iv3] = {1, &v3_he};
+//            Vertex v3_he{&he3, v3, 1, random_string()};
+//            he3.vertex = &v3_he;
+//            _HEverts.emplace_back(&v3_he);
+//            _vertidx[iv3] = {1, &v3_he};
+
+            _HEverts.emplace_back(Vertex{&_halfedges[_halfedges.size()-1], v3, 1, random_string()});
+            _halfedges[_halfedges.size()-1].vertex = &_HEverts[_HEverts.size()-1];
+            _vertidx[iv3] = {1, &_HEverts[_HEverts.size()-1]};
         } else {
+//            _vertidx[iv3].degree++;
+//            _vertidx[iv3].vert->degree = _vertidx[iv3].degree;
+//            he3.vertex = _vertidx[iv3].vert;
+
             _vertidx[iv3].degree++;
+            std::cout << iv3 << " " << _vertidx[iv3].degree << std::endl;
+            Vertex *temp = _vertidx[iv3].vert;
+            std::cout << "yo " << temp->position << std::endl;
             _vertidx[iv3].vert->degree = _vertidx[iv3].degree;
-            he3.vertex = _vertidx[iv3].vert;
+
+//            std::cout << "hi " << _vertidx[iv3].vert->degree << std::endl;
+
+            _halfedges[_halfedges.size()-1].vertex = &_HEverts[_HEverts.size()-1];
         }
+
     }
 
-    for (auto pair = _idkmap.begin(); pair != _idkmap.end(); ++pair){
-        if (pair->second->twin == NULL){
-            pair->second->twin = _idkmap[std::pair<int,int>(pair->first.second, pair->first.first)];
-        }
-    }
+//    for (auto pair = _idkmap.begin(); pair != _idkmap.end(); ++pair){
+//        if (pair->second->twin == NULL){
+//            pair->second->twin = _idkmap[std::pair<int,int>(pair->first.second, pair->first.first)];
+//        }
+//    }
 
 //    for(HE *h: _halfedges){
 //        std::cout<< h->vertex->degree << std::endl;
@@ -229,9 +280,9 @@ void Mesh::convertToOBJ(){
     _faces.clear();
     std::vector<int> idx;
     idx.reserve(3);
-    for (Face *f : _HEfaces){
+    for (Face f : _HEfaces){
 
-        HE *currhe = f->halfedge;
+        HE *currhe = f.halfedge;
         do {
             Vertex *v = currhe->vertex; //hash unique id for vertex to vertex's new index
 //            std::cout << currhe->next << std::endl;
@@ -247,7 +298,7 @@ void Mesh::convertToOBJ(){
             }
             currhe = currhe->next;
         }
-        while (currhe != f->halfedge);
+        while (currhe != f.halfedge);
         Vector3i curr(idx[0], idx[1], idx[2]);
         _faces.emplace_back(curr);
     }
