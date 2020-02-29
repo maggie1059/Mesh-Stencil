@@ -242,11 +242,11 @@ void Mesh::convertToHE(){
 
     }
 
-//    for (auto pair = _idkmap.begin(); pair != _idkmap.end(); ++pair){
-//        if (pair->second->twin == NULL){
-//            pair->second->twin = _idkmap[std::pair<int,int>(pair->first.second, pair->first.first)];
-//        }
-//    }
+    for (auto pair = _idkmap.begin(); pair != _idkmap.end(); ++pair){
+        if (pair->second->twin == NULL){
+            pair->second->twin = _idkmap[std::pair<int,int>(pair->first.second, pair->first.first)];
+        }
+    }
 
 //    for(HE *h: _halfedges){
 //        std::cout<< h->vertex->degree << std::endl;

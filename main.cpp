@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
     cout << "Execution takes: " << duration << " milliseconds." <<endl;
     // TODO
     // Convert your datastructure back to the basic format
-//    m.convertToOBJ();
+    m.convertToOBJ();
 //    m.fun2();
     ////////////////////////////////////////////////////////////////////////////////
     m.saveToFile(outfile.toStdString());
