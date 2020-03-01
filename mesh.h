@@ -111,10 +111,10 @@ public:
 private:
     std::vector<Eigen::Vector3f> _vertices;
     std::vector<Eigen::Vector3i> _faces;
-    std::vector<HE> _halfedges;
-    std::vector<Vertex> _HEverts;
-    std::vector<Edge> _edges;
-    std::vector<Face> _HEfaces;
+    std::vector<HE*> _halfedges;
+    std::vector<Vertex*> _HEverts;
+    std::vector<Edge*> _edges;
+    std::vector<Face*> _HEfaces;
 //    std::unordered_map<int, VertTracker> _vertmap;
     std::unordered_map<int, VertTracker> _vertidx;
     std::unordered_map<std::pair<int, int>, HE*, hash_pair> _idkmap;
