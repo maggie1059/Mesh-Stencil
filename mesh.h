@@ -57,48 +57,28 @@ struct Vertex{
 
 struct Edge{
     HE *halfedge;
-    Eigen::Vector3f vert1;
-    Eigen::Vector3f vert2;
+//    Vertex *vert1;
+//    Vertex *vert2;
+//    Eigen::Vector3f vert1;
+//    Eigen::Vector3f vert2;
 };
 
 struct Face{
     HE *halfedge;
-    Eigen::Vector3i verts;
-    Eigen::Vector3f normal;
+//    Eigen::Vector3i verts;
+//    Eigen::Vector3f normal;
 };
 
 struct VertTracker{
     int degree;
-//    Edge *edge;
     Vertex *vert;
 };
-
-//class Vector3fHash{
-//public:
-//    bool operator()(const Eigen::Vector3f& v1) {
-//       return v1[0];
-//    }
-//};
-
-//template<typename T>
-//struct matrix_hash : std::unary_function<T, size_t> {
-//  std::size_t operator()(T const& matrix) const {
-//    // Note that it is oblivious to the storage order of Eigen matrix (column- or
-//    // row-major). It will give you the same hash value for two different matrices if they
-//    // are the transpose of each other in different storage order.
-//    size_t seed = 0;
-//    for (size_t i = 0; i < matrix.size(); ++i) {
-//      auto elem = *(matrix.data() + i);
-//      seed ^= std::hash<typename T::Scalar>()(elem) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-//    }
-//    return seed;
-//  }
-//};
 
 class Mesh
 {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    virtual ~Mesh();
     void initFromVectors(const std::vector<Eigen::Vector3f> &vertices,
          const std::vector<Eigen::Vector3i> &faces);
     void loadFromFile(const std::string &filePath);
@@ -107,23 +87,27 @@ public:
     void convertToOBJ();
     void fun();
     void fun2();
+    void flip(HE *halfedge);
+    void split(HE *halfedge, std::vector<Edge*> &newedges, const std::unordered_map<std::string, Vertex*> &oldverts);
+    void collapse(HE *halfedge);
+    void subdivide();
 
 private:
     std::vector<Eigen::Vector3f> _vertices;
     std::vector<Eigen::Vector3i> _faces;
+
     std::vector<HE*> _halfedges;
     std::vector<Vertex*> _HEverts;
     std::vector<Edge*> _edges;
     std::vector<Face*> _HEfaces;
-//    std::unordered_map<int, VertTracker> _vertmap;
-    std::unordered_map<int, VertTracker> _vertidx;
-    std::unordered_map<std::pair<int, int>, HE*, hash_pair> _idkmap;
-    std::unordered_map<std::string, int> _lastmap;
+
+    std::unordered_map<int, VertTracker> _vertidx; //used to keep vertices unique and get degree
+    std::unordered_map<std::pair<int, int>, HE*, hash_pair> _idkmap; //used to get twins
+    std::unordered_map<std::string, int> _lastmap; //used to convert back to obj
     std::string random_string();
-//    std::unordered_map<Eigen::Vector3f, VertTracker, Vector3fHash> _vertmap;
-//    std::unordered_map<Eigen::Vector3f, int, Vector3fHash> _vertidx;
-    std::vector<Fun> _fun;
-    std::vector<Sad> _sad;
+
+//    std::vector<Fun> _fun;
+//    std::vector<Sad> _sad;
 };
 
 #endif // MESH_H
