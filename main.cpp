@@ -62,9 +62,10 @@ int main(int argc, char *argv[])
     // Implement the operations
     if (method == "subdivide"){
         //TODO
-        m.subdivide();
-        m.subdivide();
 //        m.subdivide();
+//        m.subdivide();
+//        m.subdivide();
+        m.simplify();
     } else if (method == "simplify"){
         //TODO
     } else if (method == "remesh"){

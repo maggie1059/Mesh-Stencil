@@ -432,10 +432,6 @@ void Mesh::collapse(HE *halfedge){
 
     Face *one = DB->face;
     Face *two = BD->face;
-//    Face *ten = FD->face;
-//    Face *nine = KD->face;
-//    Face *eight = JD->face;
-//    Face *seven = DJ->face;
 
     //delete one, two
 
@@ -451,6 +447,8 @@ void Mesh::collapse(HE *halfedge){
     Vertex *B = BD->vertex;
     Vertex *C = CD->vertex;
     Vertex *A = AB->vertex;
+    
+    //
 
     C->degree -= 1;
     A->degree -= 1;

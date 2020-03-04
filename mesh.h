@@ -84,12 +84,13 @@ public:
     void split(HE *halfedge, std::vector<Edge*> &newedges, const std::unordered_map<std::string, Vertex*> &oldverts);
     void collapse(HE *halfedge);
     void subdivide();
+    void simplify();
 
 private:
     std::vector<Eigen::Vector3f> _vertices;
     std::vector<Eigen::Vector3i> _faces;
 
-//    std::vector<HE*> _halfedges;
+//    std::vector<HE*> _halfedgeslist;
 //    std::vector<Vertex*> _HEverts;
 //    std::vector<Edge*> _edges;
 //    std::vector<Face*> _HEfaces;
