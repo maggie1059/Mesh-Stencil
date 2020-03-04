@@ -29,16 +29,6 @@ struct hash_pair {
 struct Vertex;
 struct Edge;
 struct Face;
-struct Sad;
-
-struct Fun{
-    int hi;
-    Sad *boo;
-};
-
-struct Sad{
-    Fun *fun;
-};
 
 struct HE{
     HE *twin;
@@ -115,9 +105,6 @@ private:
     std::string random_string();
     Eigen::Vector3f adjustPos(Vertex *v);
     int getNumNeighbors(Vertex *v);
-
-//    std::vector<Fun> _fun;
-//    std::vector<Sad> _sad;
 };
 
 #endif // MESH_H

@@ -35,6 +35,22 @@ Mesh::~Mesh()
 //    for (Face *f: _HEfaces){
 //        delete f;
 //    }
+    for (auto it = _halfedges.begin(); it != _halfedges.end(); ++it){
+        HE *f = it->second;
+        delete f;
+    }
+    for (auto it = _HEverts.begin(); it != _HEverts.end(); ++it){
+        Vertex *f = it->second;
+        delete f;
+    }
+    for (auto it = _edges.begin(); it != _edges.end(); ++it){
+        Edge *f = it->second;
+        delete f;
+    }
+    for (auto it = _HEfaces.begin(); it != _HEfaces.end(); ++it){
+        Face *f = it->second;
+        delete f;
+    }
 }
 
 void Mesh::loadFromFile(const std::string &filePath)
@@ -302,7 +318,7 @@ void Mesh::split(HE *halfedge, std::vector<Edge*> &newedges, const std::unordere
     HE *EB = new HE{NULL, BC, E, NULL, one, random_string()};
     HE *BE = new HE{EB, NULL, B, NULL, two, random_string()}; //next = ED
     HE *ED = new HE{NULL, DB, E, NULL, two, random_string()};
-    HE *DE = new HE{ED, BA, D, NULL, NULL};
+    HE *DE = new HE{ED, BA, D, NULL, NULL, random_string()};
 
     EC->twin = CE;
     EB->twin = BE;
@@ -314,20 +330,29 @@ void Mesh::split(HE *halfedge, std::vector<Edge*> &newedges, const std::unordere
     DB->next = BE;
     AD->next = DE;
 
-    _halfedges.push_back(EC);
-    _halfedges.push_back(CE);
-    _halfedges.push_back(EB);
-    _halfedges.push_back(BE);
-    _halfedges.push_back(ED);
-    _halfedges.push_back(DE);
+//    _halfedges.push_back(EC);
+//    _halfedges.push_back(CE);
+//    _halfedges.push_back(EB);
+//    _halfedges.push_back(BE);
+//    _halfedges.push_back(ED);
+//    _halfedges.push_back(DE);
+    _halfedges[EC->randid] = EC;
+    _halfedges[CE->randid] = CE;
+    _halfedges[EB->randid] = EB;
+    _halfedges[BE->randid] = BE;
+    _halfedges[ED->randid] = ED;
+    _halfedges[DE->randid] = DE;
 
-    Edge *edEC = new Edge{EC};
-    Edge *edEB = new Edge{EB};
-    Edge *edED = new Edge{ED};
+    Edge *edEC = new Edge{EC, random_string()};
+    Edge *edEB = new Edge{EB, random_string()};
+    Edge *edED = new Edge{ED, random_string()};
 
-    _edges.emplace_back(edEC);
-    _edges.emplace_back(edEB);
-    _edges.emplace_back(edED);
+//    _edges.emplace_back(edEC);
+//    _edges.emplace_back(edEB);
+//    _edges.emplace_back(edED);
+    _edges[edEC->randid] = edEC;
+    _edges[edEB->randid] = edEB;
+    _edges[edED->randid] = edED;
 
     if (oldverts.find(C->randid) != oldverts.end()){
         newedges.push_back(edEC);
@@ -345,8 +370,8 @@ void Mesh::split(HE *halfedge, std::vector<Edge*> &newedges, const std::unordere
     ED->edge = edED;
     DE->edge = edED;
 
-    Face *three = new Face{CA};
-    Face *four = new Face{AD};
+    Face *three = new Face{CA, random_string()};
+    Face *four = new Face{AD, random_string()};
 
     B->halfedge = BC;
     C->halfedge = CE;
@@ -365,8 +390,10 @@ void Mesh::split(HE *halfedge, std::vector<Edge*> &newedges, const std::unordere
     EC->face = three;
     DE->face = four;
 
-    _HEfaces.emplace_back(three);
-    _HEfaces.emplace_back(four);
+//    _HEfaces.emplace_back(three);
+//    _HEfaces.emplace_back(four);
+    _HEfaces[three->randid] = three;
+    _HEfaces[four->randid] = four;
 
 //    std::cout << A->randid <<std::endl;
 //    std::cout << B->randid <<std::endl;
@@ -383,6 +410,9 @@ void Mesh::collapse(HE *halfedge){
     HE *DB = halfedge->twin;
     HE *BC = DB->next;
     HE *CD = BC->next;
+
+    HE *DC = CD->twin;
+    HE *AD = DA->twin;
 
     //delete CD, DA, AB, BC
 
@@ -406,7 +436,35 @@ void Mesh::collapse(HE *halfedge){
 
     B->position = (B->position + D->position)/2.f;
     D->position = B->position;
+
     //delete D, DC, DB, BD, CD, DA, AD, one, two, edCD, edDA, edDB
+    delete _HEfaces[one->randid];
+    _HEfaces.erase(one->randid);
+    delete _HEfaces[two->randid];
+    _HEfaces.erase(two->randid);
+
+    delete _HEverts[D->randid];
+    _HEverts.erase(D->randid);
+
+    delete _edges[edCD->randid];
+    _edges.erase(edCD->randid);
+    delete _edges[edDA->randid];
+    _edges.erase(edDA->randid);
+    delete _edges[edDB->randid];
+    _edges.erase(edDB->randid);
+
+    delete _halfedges[DC->randid];
+    _halfedges.erase(DC->randid);
+    delete _halfedges[DB->randid];
+    _halfedges.erase(DB->randid);
+    delete _halfedges[BD->randid];
+    _halfedges.erase(BD->randid);
+    delete _halfedges[CD->randid];
+    _halfedges.erase(CD->randid);
+    delete _halfedges[DA->randid];
+    _halfedges.erase(DA->randid);
+    delete _halfedges[AD->randid];
+    _halfedges.erase(AD->randid);
 }
 
 void Mesh::subdivide(){
@@ -414,14 +472,22 @@ void Mesh::subdivide(){
     std::vector<Edge*> edgecopy;
     std::unordered_map<std::string, Vertex*> oldverts;
     std::unordered_map<std::string, Vector3f> newpos;
-    for (Vertex *v : _HEverts){
-//        std::cout << v->degree << std::endl;
+    for (auto it = _HEverts.begin(); it != _HEverts.end(); ++it ){
+        Vertex *v = it->second;
         newpos[v->randid] = adjustPos(v);
         oldverts[v->randid] = v;
     }
-    for (Edge *e : _edges){
+//    for (Vertex *v : _HEverts){
+//        newpos[v->randid] = adjustPos(v);
+//        oldverts[v->randid] = v;
+//    }
+    for (auto it = _edges.begin(); it != _edges.end(); ++it ){
+        Edge *e = it->second;
         edgecopy.push_back(e);
     }
+//    for (Edge *e : _edges){
+//        edgecopy.push_back(e);
+//    }
 
     for(Edge *e : edgecopy){
         split(e->halfedge, newedges, oldverts);
@@ -446,10 +512,16 @@ void Mesh::convertToOBJ(){
     _vertices.clear();
     _faces.clear();
 //    int count = 0;
-    for (Face *f : _HEfaces){
+//    for (auto it = _HEfaces.begin(); it != _HEfaces.end(); ++it){
+//        Edge *e = it->second;
+//        edgecopy.push_back(e);
+//    }
+    for (auto it = _HEfaces.begin(); it != _HEfaces.end(); ++it){
+//    for (Face *f : _HEfaces){
 //        std::cout << _HEfaces.size() << std::endl;
 //        count = 0;
 //        count += 1;
+        Face *f = it->second;
         std::vector<int> idx;
         idx.reserve(3);
         HE *currhe = f->halfedge;
@@ -491,38 +563,25 @@ void Mesh::convertToOBJ(){
 
 Vector3f Mesh::adjustPos(Vertex *v){
     Vector3f adjust(0,0,0);
-    int vd = v->degree;//getNumNeighbors(v);
-//    std::cout << "sad: " << getNumNeighbors(v) << std::endl;
-//    std::cout << vd << std::endl;
+    int vd = v->degree;
     HE *currhe = v->halfedge;
-//    if (vd==5 && getNumNeighbors(v)==6){
-//        std::cout << v->randid << std::endl;
-//    }
     int count = 0;
     do {
         Vertex *currv = currhe->twin->vertex;
-//        if (vd==5 && getNumNeighbors(v)==6){
-//            std::cout << "count: " << count<< std::endl;
-//            std::cout << currv->randid << std::endl;
-//        }
-//        if (vd == 3){
-//            adjust += 3.f/16.f * currv->position;
-//        } else {
+        if (vd == 3){
+            adjust += 3.f/16.f * currv->position;
+        } else {
             adjust += (3.f/(8.f*vd)) * currv->position;
-//        }
+        }
         currhe = currhe->twin->next;
         count++;
     } while (currhe != v->halfedge);
-//    if (vd==5 && getNumNeighbors(v)==6){
-//        std::cout << v->randid << std::endl;
-//        std::cout << " " << std::endl;
-//    }
     float u;
-//    if (vd == 3){
-//        u = 3.f/16.f;
-//    } else {
+    if (vd == 3){
+        u = 3.f/16.f;
+    } else {
         u = 3.f/(8.f*vd);
-//    }
+    }
     return adjust + ((1.f - (vd * u))*v->position);
 }
 
@@ -563,19 +622,4 @@ void Mesh::saveToFile(const std::string &filePath)
 
     outfile.close();
     std::cout << "Wrote to file." << std::endl;
-}
-
-
-void Mesh::fun(){
-//    _fun.emplace(_fun.end(), Fun{4, NULL});
-//    _fun[0] = new Fun{4,2};
-//    std::cout << "hi" << std::endl;
-//    _fun[1] = Fun{3,1};
-//    _sad.emplace(_sad.end(), Sad{&_fun[_fun.size() -1]});
-
-}
-
-void Mesh::fun2(){
-//    std::cout << "hi2" << std::endl;
-//    std::cout<< _fun[0].hi << std::endl;
 }
