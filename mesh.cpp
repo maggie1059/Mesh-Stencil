@@ -19,27 +19,22 @@ void Mesh::initFromVectors(const std::vector<Vector3f> &vertices,
 {
     _vertices = vertices;
     _faces = faces;
-//    _idkmap;
-//    _lastmap;
-//    _vertmap;
-//    _vertidx;
-//    _fun.reserve(2);
 }
 
 Mesh::~Mesh()
 {
-    for (HE *he : _halfedges){
-        delete he;
-    }
-    for (Vertex *v : _HEverts){
-        delete v;
-    }
-    for (Edge *e : _edges){
-        delete e;
-    }
-    for (Face *f: _HEfaces){
-        delete f;
-    }
+//    for (HE *he : _halfedges){
+//        delete he;
+//    }
+//    for (Vertex *v : _HEverts){
+//        delete v;
+//    }
+//    for (Edge *e : _edges){
+//        delete e;
+//    }
+//    for (Face *f: _HEfaces){
+//        delete f;
+//    }
 }
 
 void Mesh::loadFromFile(const std::string &filePath)
@@ -106,20 +101,24 @@ void Mesh::convertToHE(){
             std::swap(iv2, iv3);
             normal = -normal;
         }
-        HE *he1 = new HE{NULL, NULL, NULL, NULL, NULL}; //twin, next, vertex, edge, face
-        HE *he2 = new HE{NULL, NULL, NULL, NULL, NULL};
-        HE *he3 = new HE{NULL, NULL, NULL, NULL, NULL};
-        _halfedges.emplace_back(he1);
-        _halfedges.emplace_back(he2);
-        _halfedges.emplace_back(he3);
+        HE *he1 = new HE{NULL, NULL, NULL, NULL, NULL, random_string()}; //twin, next, vertex, edge, face
+        HE *he2 = new HE{NULL, NULL, NULL, NULL, NULL, random_string()};
+        HE *he3 = new HE{NULL, NULL, NULL, NULL, NULL, random_string()};
+        _halfedges[he1->randid] = he1;
+        _halfedges[he2->randid] = he2;
+        _halfedges[he2->randid] = he2;
+//        _halfedges.emplace_back(he1);
+//        _halfedges.emplace_back(he2);
+//        _halfedges.emplace_back(he3);
 
 //        Face *f = new Face{he1, face, normal};
 //        Face *f = new Face{he1, normal};
-        Face *f = new Face{he1};
+        Face *f = new Face{he1, random_string()};
         he1->face = f;
         he2->face = f;
         he3->face = f;
-        _HEfaces.emplace(_HEfaces.end(), f);
+//        _HEfaces.emplace(_HEfaces.end(), f);
+        _HEfaces[f->randid] = f;
 
         he1->next = he2;
         he2->next = he3;
@@ -128,7 +127,8 @@ void Mesh::convertToHE(){
         if (_vertidx.find(iv1) == _vertidx.end()){
             Vertex *v1_he = new Vertex{he1, v1, 1, random_string()};
             he1->vertex = v1_he;
-            _HEverts.emplace_back(v1_he);
+//            _HEverts.emplace_back(v1_he);
+            _HEverts[v1_he->randid] = v1_he;
             _vertidx[iv1] = {1, v1_he};
 
         } else {
@@ -139,9 +139,10 @@ void Mesh::convertToHE(){
 
         if (_idkmap.find(std::pair<int,int>(iv1, iv2)) == _idkmap.end() && _idkmap.find(std::pair<int,int>(iv2, iv1)) == _idkmap.end()){
 //            Edge *e1 = new Edge{he1, _vertidx[iv1].vert, _vertidx[iv2].vert};
-            Edge *e1 = new Edge{he1};
+            Edge *e1 = new Edge{he1, random_string()};
             he1->edge = e1;
-            _edges.emplace_back(e1);
+//            _edges.emplace_back(e1);
+            _edges[e1->randid] = e1;
             _idkmap[std::pair<int,int>(iv1, iv2)] = he1;
         } else {
             Edge *blah = _idkmap[std::pair<int,int>(iv2, iv1)]->edge;
@@ -152,7 +153,8 @@ void Mesh::convertToHE(){
         if (_vertidx.find(iv2) == _vertidx.end()){
             Vertex *v2_he = new Vertex{he2, v2, 1, random_string()};
             he2->vertex = v2_he;
-            _HEverts.emplace_back(v2_he);
+//            _HEverts.emplace_back(v2_he);
+            _HEverts[v2_he->randid] = v2_he;
             _vertidx[iv2] = {1, v2_he};
         } else {
             _vertidx[iv2].degree++;
@@ -162,9 +164,10 @@ void Mesh::convertToHE(){
 
         if (_idkmap.find(std::pair<int,int>(iv2, iv3)) == _idkmap.end() && _idkmap.find(std::pair<int,int>(iv3, iv2)) == _idkmap.end()){
 //            Edge *e2 = new Edge{he2, _vertidx[iv2].vert, _vertidx[iv3].vert};
-            Edge *e2 = new Edge{he2};
+            Edge *e2 = new Edge{he2, random_string()};
             he2->edge = e2;
-            _edges.emplace_back(e2);
+//            _edges.emplace_back(e2);
+            _edges[e2->randid] = e2;
             _idkmap[std::pair<int,int>(iv2, iv3)] = he2;
         } else {
             Edge *blah = _idkmap[std::pair<int,int>(iv3, iv2)]->edge;
@@ -175,7 +178,8 @@ void Mesh::convertToHE(){
         if (_vertidx.find(iv3) == _vertidx.end()){
             Vertex *v3_he = new Vertex{he3, v3, 1, random_string()};
             he3->vertex = v3_he;
-            _HEverts.emplace_back(v3_he);
+//            _HEverts.emplace_back(v3_he);
+            _HEverts[v3_he->randid] = v3_he;
             _vertidx[iv3] = {1, v3_he};
         } else {
             _vertidx[iv3].degree++;
@@ -185,9 +189,10 @@ void Mesh::convertToHE(){
 
         if (_idkmap.find(std::pair<int,int>(iv3, iv1)) == _idkmap.end() && _idkmap.find(std::pair<int,int>(iv1, iv3)) == _idkmap.end()){
 //            Edge *e3 = new Edge{he3, _vertidx[iv3].vert, _vertidx[iv1].vert};
-            Edge *e3 = new Edge{he3};
+            Edge *e3 = new Edge{he3, random_string()};
             he3->edge = e3;
-            _edges.emplace_back(e3);
+//            _edges.emplace_back(e3);
+            _edges[e3->randid] = e3;
             _idkmap[std::pair<int,int>(iv3, iv1)] = he3;
         } else {
             Edge *blah = _idkmap[std::pair<int,int>(iv1, iv3)]->edge;
@@ -202,8 +207,16 @@ void Mesh::convertToHE(){
             pair->second->twin = _idkmap[std::pair<int,int>(pair->first.second, pair->first.first)];
         }
     }
+}
 
-//    split(_halfedges[0]);
+int Mesh::getNumNeighbors(Vertex *v){
+    HE *currhe = v->halfedge;
+    int count = 0;
+    do {
+        currhe = currhe->twin->next;
+        count++;
+    } while (currhe != v->halfedge);
+    return count;
 }
 
 void Mesh::flip(HE *halfedge){
@@ -224,14 +237,15 @@ void Mesh::flip(HE *halfedge){
     Vertex *C = CA->vertex; // halfedge, degree
     Vertex *D = DB->vertex;
 
-    if (!(A->degree == 3 || B->degree == 3)){
+    if (!(getNumNeighbors(A) == 3 || getNumNeighbors(B) == 3)){
         A->halfedge = AD;
+        B->halfedge = BC;
         A->degree -= 1;
         B->degree -= 1;
         C->degree += 1;
         D->degree += 1;
 
-        AB->next = DB;
+        AB->next = DB; //twin, next, vertex, edge, face
         AB->vertex = C;
         BA->next = CA;
         BA->vertex = D;
@@ -244,18 +258,16 @@ void Mesh::flip(HE *halfedge){
         DB->next = BC;
         DB->face = ABC;
 
-        ABC->halfedge = AB;
-        ADB->halfedge = BA;
+        ABC->halfedge = BC;
+        ADB->halfedge = AD;
     }
-
 //    Edge *eddy = halfedge->edge; //halfedge, verts, normal
-
 //    eddy->vert1 = C;
 //    eddy->vert2 = D;
 }
 
 void Mesh::split(HE *halfedge, std::vector<Edge*> &newedges, const std::unordered_map<std::string, Vertex*> &oldverts){
-    HE *AB = halfedge; // 1   //twin, next, vertex, edge, face //AE
+    HE *AB = halfedge; // 1   //twin, next, vertex, edge, face
     HE *BA = halfedge->twin; // 2 //EA
 
     HE *BC = halfedge->next; // 1
@@ -274,9 +286,10 @@ void Mesh::split(HE *halfedge, std::vector<Edge*> &newedges, const std::unordere
     Vertex *C = CA->vertex; // halfedge, degree
     Vertex *D = DB->vertex;
 
-    Vector3f position = (B->position + A->position)/2.f;//(B->position*3.f/8.f) + (A->position*3.f/8.f) + (C->position*1.f/8.f) + (D->position*1.f/8.f);
+    Vector3f position = (B->position*3.f/8.f) + (A->position*3.f/8.f) + (C->position*1.f/8.f) + (D->position*1.f/8.f); //(B->position + A->position)/2.f;
     Vertex *E = new Vertex{BA, position, 4, random_string()};
-    _HEverts.emplace_back(E);
+//    _HEverts.emplace_back(E);
+    _HEverts[E->randid] = E;
 
     BA->vertex = E;
 
@@ -284,13 +297,11 @@ void Mesh::split(HE *halfedge, std::vector<Edge*> &newedges, const std::unordere
     D->degree += 1;
 
     //update _lastmap, _HEverts
-//    he3->vertex = v3_he;
-
-    HE *EC = new HE{NULL, CA, E, NULL, NULL};
-    HE *CE = new HE{EC, NULL, C, NULL, one}; //next = EB
-    HE *EB = new HE{NULL, BC, E, NULL, one};
-    HE *BE = new HE{EB, NULL, B, NULL, two}; //next = ED
-    HE *ED = new HE{NULL, DB, E, NULL, two};
+    HE *EC = new HE{NULL, CA, E, NULL, NULL, random_string()};
+    HE *CE = new HE{EC, NULL, C, NULL, one, random_string()}; //next = EB
+    HE *EB = new HE{NULL, BC, E, NULL, one, random_string()};
+    HE *BE = new HE{EB, NULL, B, NULL, two, random_string()}; //next = ED
+    HE *ED = new HE{NULL, DB, E, NULL, two, random_string()};
     HE *DE = new HE{ED, BA, D, NULL, NULL};
 
     EC->twin = CE;
@@ -324,7 +335,6 @@ void Mesh::split(HE *halfedge, std::vector<Edge*> &newedges, const std::unordere
     if (oldverts.find(D->randid) != oldverts.end()){
         newedges.push_back(edED);
     }
-
 //    newedges.push_back(edEB);
 //    newedges.push_back(eddy);
 
@@ -344,12 +354,7 @@ void Mesh::split(HE *halfedge, std::vector<Edge*> &newedges, const std::unordere
 
 
     one->halfedge = BC;
-    two->halfedge = DB;//ED;
-
-//    one->normal = ;
-//    two->normal = ;
-//    three->normal = ;
-//    four->normal = ;
+    two->halfedge = DB;
 
     AB->face = three;
     BA->face = four;
@@ -372,14 +377,46 @@ void Mesh::split(HE *halfedge, std::vector<Edge*> &newedges, const std::unordere
 }
 
 void Mesh::collapse(HE *halfedge){
+    HE *BD = halfedge;
+    HE *DA = BD->next;
+    HE *AB = DA->next;
+    HE *DB = halfedge->twin;
+    HE *BC = DB->next;
+    HE *CD = BC->next;
 
+    //delete CD, DA, AB, BC
+
+    Face *one = DB->face;
+    Face *two = BD->face;
+
+    //delete one, two
+
+    Edge *edCD = CD->edge;
+    Edge *edDA = DA->edge;
+    Edge *edAB = AB->edge;
+    Edge *edBC = BC->edge;
+    Edge *edDB = halfedge->edge;
+
+    //delete edCD, edDA, all?
+
+    Vertex *D = DA->vertex;
+    Vertex *B = BD->vertex;
+
+    //delete D?
+
+    B->position = (B->position + D->position)/2.f;
+    D->position = B->position;
+    //delete D, DC, DB, BD, CD, DA, AD, one, two, edCD, edDA, edDB
 }
 
 void Mesh::subdivide(){
     std::vector<Edge*> newedges;
     std::vector<Edge*> edgecopy;
     std::unordered_map<std::string, Vertex*> oldverts;
+    std::unordered_map<std::string, Vector3f> newpos;
     for (Vertex *v : _HEverts){
+//        std::cout << v->degree << std::endl;
+        newpos[v->randid] = adjustPos(v);
         oldverts[v->randid] = v;
     }
     for (Edge *e : _edges){
@@ -389,12 +426,20 @@ void Mesh::subdivide(){
     for(Edge *e : edgecopy){
         split(e->halfedge, newedges, oldverts);
     }
-
     for (Edge *e : newedges){
-//        std::cout << e->halfedge->vertex->randid << std::endl;
         flip(e->halfedge);
     }
+    for (auto it = newpos.begin(); it != newpos.end(); ++it ){
+        Vertex *curr = oldverts[it->first];
+//        std::cout << getNumNeighbors(curr) << std::endl;
+//        std::cout << "old: " << curr->position << std::endl;
+        curr->position = it->second;
+//        std::cout << "new: " << curr->position << std::endl;
+//        count++;
+    }
+//    std::cout << count << std::endl;
     edgecopy.clear();
+//    std::cout << " " << std::endl;
 }
 
 void Mesh::convertToOBJ(){
@@ -412,8 +457,17 @@ void Mesh::convertToOBJ(){
         do {
             Vertex *v = currhe->vertex; //hash unique id for vertex to vertex's new index
             if (_lastmap.find(v->randid) == _lastmap.end()){
-
-                _vertices.emplace_back(v->position);
+                Vector3f position = v->position;
+                if (abs(position[0]) < 0.0001){
+                    position[0] = 0;
+                }
+                if (abs(position[1]) < 0.0001){
+                    position[1] = 0;
+                }
+                if (abs(position[2]) < 0.0001){
+                    position[2] = 0;
+                }
+                _vertices.emplace_back(position);
 
                 _lastmap[v->randid] = _vertices.size() - 1;
                 idx.emplace_back(_lastmap[v->randid]);
@@ -433,6 +487,43 @@ void Mesh::convertToOBJ(){
         _faces.emplace_back(Vector3i(idx[0], idx[1], idx[2]));
 //        break;
     }
+}
+
+Vector3f Mesh::adjustPos(Vertex *v){
+    Vector3f adjust(0,0,0);
+    int vd = v->degree;//getNumNeighbors(v);
+//    std::cout << "sad: " << getNumNeighbors(v) << std::endl;
+//    std::cout << vd << std::endl;
+    HE *currhe = v->halfedge;
+//    if (vd==5 && getNumNeighbors(v)==6){
+//        std::cout << v->randid << std::endl;
+//    }
+    int count = 0;
+    do {
+        Vertex *currv = currhe->twin->vertex;
+//        if (vd==5 && getNumNeighbors(v)==6){
+//            std::cout << "count: " << count<< std::endl;
+//            std::cout << currv->randid << std::endl;
+//        }
+//        if (vd == 3){
+//            adjust += 3.f/16.f * currv->position;
+//        } else {
+            adjust += (3.f/(8.f*vd)) * currv->position;
+//        }
+        currhe = currhe->twin->next;
+        count++;
+    } while (currhe != v->halfedge);
+//    if (vd==5 && getNumNeighbors(v)==6){
+//        std::cout << v->randid << std::endl;
+//        std::cout << " " << std::endl;
+//    }
+    float u;
+//    if (vd == 3){
+//        u = 3.f/16.f;
+//    } else {
+        u = 3.f/(8.f*vd);
+//    }
+    return adjust + ((1.f - (vd * u))*v->position);
 }
 
 std::string Mesh::random_string(){

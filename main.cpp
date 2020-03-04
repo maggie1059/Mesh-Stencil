@@ -64,6 +64,7 @@ int main(int argc, char *argv[])
         //TODO
         m.subdivide();
 //        m.subdivide();
+//        m.subdivide();
     } else if (method == "simplify"){
         //TODO
     } else if (method == "remesh"){

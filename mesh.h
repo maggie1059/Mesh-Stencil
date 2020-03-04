@@ -46,6 +46,7 @@ struct HE{
     Vertex *vertex;
     Edge *edge;
     Face *face;
+    std::string randid;
 };
 
 struct Vertex{
@@ -57,6 +58,7 @@ struct Vertex{
 
 struct Edge{
     HE *halfedge;
+    std::string randid;
 //    Vertex *vert1;
 //    Vertex *vert2;
 //    Eigen::Vector3f vert1;
@@ -65,6 +67,7 @@ struct Edge{
 
 struct Face{
     HE *halfedge;
+    std::string randid;
 //    Eigen::Vector3i verts;
 //    Eigen::Vector3f normal;
 };
@@ -96,15 +99,22 @@ private:
     std::vector<Eigen::Vector3f> _vertices;
     std::vector<Eigen::Vector3i> _faces;
 
-    std::vector<HE*> _halfedges;
-    std::vector<Vertex*> _HEverts;
-    std::vector<Edge*> _edges;
-    std::vector<Face*> _HEfaces;
+//    std::vector<HE*> _halfedges;
+//    std::vector<Vertex*> _HEverts;
+//    std::vector<Edge*> _edges;
+//    std::vector<Face*> _HEfaces;
+
+    std::unordered_map<std::string, HE*> _halfedges;
+    std::unordered_map<std::string, Vertex*> _HEverts;
+    std::unordered_map<std::string, Edge*> _edges;
+    std::unordered_map<std::string, Face*> _HEfaces;
 
     std::unordered_map<int, VertTracker> _vertidx; //used to keep vertices unique and get degree
     std::unordered_map<std::pair<int, int>, HE*, hash_pair> _idkmap; //used to get twins
     std::unordered_map<std::string, int> _lastmap; //used to convert back to obj
     std::string random_string();
+    Eigen::Vector3f adjustPos(Vertex *v);
+    int getNumNeighbors(Vertex *v);
 
 //    std::vector<Fun> _fun;
 //    std::vector<Sad> _sad;
