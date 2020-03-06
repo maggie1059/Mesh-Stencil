@@ -7,6 +7,9 @@
 #include <QString>
 #include <unordered_map>
 #include <Eigen/Dense>
+#include <unordered_set>
+#include <set>
+#include <queue>
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "util/tiny_obj_loader.h"
@@ -129,7 +132,7 @@ void Mesh::convertToHE(){
 
 //        Face *f = new Face{he1, face, normal};
 //        Face *f = new Face{he1, normal};
-        Face *f = new Face{he1, random_string()};
+        Face *f = new Face{he1, random_string(), Matrix4f::Zero()};
         he1->face = f;
         he2->face = f;
         he3->face = f;
@@ -141,7 +144,7 @@ void Mesh::convertToHE(){
         he3->next = he1;
 
         if (_vertidx.find(iv1) == _vertidx.end()){
-            Vertex *v1_he = new Vertex{he1, v1, 1, random_string()};
+            Vertex *v1_he = new Vertex{he1, v1, 1, random_string(), Matrix4f::Zero()};
             he1->vertex = v1_he;
 //            _HEverts.emplace_back(v1_he);
             _HEverts[v1_he->randid] = v1_he;
@@ -155,7 +158,7 @@ void Mesh::convertToHE(){
 
         if (_idkmap.find(std::pair<int,int>(iv1, iv2)) == _idkmap.end() && _idkmap.find(std::pair<int,int>(iv2, iv1)) == _idkmap.end()){
 //            Edge *e1 = new Edge{he1, _vertidx[iv1].vert, _vertidx[iv2].vert};
-            Edge *e1 = new Edge{he1, random_string()};
+            Edge *e1 = new Edge{he1, random_string(), Matrix4f::Zero(), Vector3f(0,0,0), 0};
             he1->edge = e1;
 //            _edges.emplace_back(e1);
             _edges[e1->randid] = e1;
@@ -167,7 +170,7 @@ void Mesh::convertToHE(){
         }
 
         if (_vertidx.find(iv2) == _vertidx.end()){
-            Vertex *v2_he = new Vertex{he2, v2, 1, random_string()};
+            Vertex *v2_he = new Vertex{he2, v2, 1, random_string(), Matrix4f::Zero()};
             he2->vertex = v2_he;
 //            _HEverts.emplace_back(v2_he);
             _HEverts[v2_he->randid] = v2_he;
@@ -180,7 +183,7 @@ void Mesh::convertToHE(){
 
         if (_idkmap.find(std::pair<int,int>(iv2, iv3)) == _idkmap.end() && _idkmap.find(std::pair<int,int>(iv3, iv2)) == _idkmap.end()){
 //            Edge *e2 = new Edge{he2, _vertidx[iv2].vert, _vertidx[iv3].vert};
-            Edge *e2 = new Edge{he2, random_string()};
+            Edge *e2 = new Edge{he2, random_string(), Matrix4f::Zero(), Vector3f(0,0,0), 0};
             he2->edge = e2;
 //            _edges.emplace_back(e2);
             _edges[e2->randid] = e2;
@@ -192,7 +195,7 @@ void Mesh::convertToHE(){
         }
 
         if (_vertidx.find(iv3) == _vertidx.end()){
-            Vertex *v3_he = new Vertex{he3, v3, 1, random_string()};
+            Vertex *v3_he = new Vertex{he3, v3, 1, random_string(), Matrix4f::Zero()};
             he3->vertex = v3_he;
 //            _HEverts.emplace_back(v3_he);
             _HEverts[v3_he->randid] = v3_he;
@@ -205,7 +208,7 @@ void Mesh::convertToHE(){
 
         if (_idkmap.find(std::pair<int,int>(iv3, iv1)) == _idkmap.end() && _idkmap.find(std::pair<int,int>(iv1, iv3)) == _idkmap.end()){
 //            Edge *e3 = new Edge{he3, _vertidx[iv3].vert, _vertidx[iv1].vert};
-            Edge *e3 = new Edge{he3, random_string()};
+            Edge *e3 = new Edge{he3, random_string(), Matrix4f::Zero(), Vector3f(0,0,0), 0};
             he3->edge = e3;
 //            _edges.emplace_back(e3);
             _edges[e3->randid] = e3;
@@ -225,16 +228,6 @@ void Mesh::convertToHE(){
     }
 
 //    collapse(_halfedgeslist[0]);
-}
-
-int Mesh::getNumNeighbors(Vertex *v){
-    HE *currhe = v->halfedge;
-    int count = 0;
-    do {
-        currhe = currhe->twin->next;
-        count++;
-    } while (currhe != v->halfedge);
-    return count;
 }
 
 void Mesh::flip(HE *halfedge){
@@ -345,9 +338,9 @@ void Mesh::split(HE *halfedge, std::vector<Edge*> &newedges, const std::unordere
     _halfedges[ED->randid] = ED;
     _halfedges[DE->randid] = DE;
 
-    Edge *edEC = new Edge{EC, random_string()};
-    Edge *edEB = new Edge{EB, random_string()};
-    Edge *edED = new Edge{ED, random_string()};
+    Edge *edEC = new Edge{EC, random_string(), Matrix4f::Zero(), Vector3f(0,0,0), 0};
+    Edge *edEB = new Edge{EB, random_string(), Matrix4f::Zero(), Vector3f(0,0,0), 0};
+    Edge *edED = new Edge{ED, random_string(), Matrix4f::Zero(), Vector3f(0,0,0), 0};
 
 //    _edges.emplace_back(edEC);
 //    _edges.emplace_back(edEB);
@@ -372,8 +365,8 @@ void Mesh::split(HE *halfedge, std::vector<Edge*> &newedges, const std::unordere
     ED->edge = edED;
     DE->edge = edED;
 
-    Face *three = new Face{CA, random_string()};
-    Face *four = new Face{AD, random_string()};
+    Face *three = new Face{CA, random_string(), Matrix4f::Zero()};
+    Face *four = new Face{AD, random_string(), Matrix4f::Zero()};
 
     B->halfedge = BC;
     C->halfedge = CE;
@@ -406,6 +399,7 @@ void Mesh::split(HE *halfedge, std::vector<Edge*> &newedges, const std::unordere
 }
 
 void Mesh::collapse(HE *halfedge){
+
     //inner
     HE *BD = halfedge;
     HE *DA = BD->next;
@@ -413,10 +407,16 @@ void Mesh::collapse(HE *halfedge){
     HE *DB = halfedge->twin;
     HE *BC = DB->next;
     HE *CD = BC->next;
+    std::cout << DB->randid <<std::endl;
+    std::cout << CD->next->randid <<std::endl;
 
     //outer
     HE *CB = BC->twin;
+    std::cout << "crashing now" <<std::endl;
+//    std::cout << AB->randid <<std::endl;
+    //crashes on next line
     HE *BA = AB->twin;
+
     HE *DC = CD->twin;
     HE *AD = DA->twin;
 
@@ -432,10 +432,6 @@ void Mesh::collapse(HE *halfedge){
 
     Face *one = DB->face;
     Face *two = BD->face;
-//    Face *ten = FD->face;
-//    Face *nine = KD->face;
-//    Face *eight = JD->face;
-//    Face *seven = DJ->face;
 
     //delete one, two
 
@@ -452,81 +448,223 @@ void Mesh::collapse(HE *halfedge){
     Vertex *C = CD->vertex;
     Vertex *A = AB->vertex;
 
-    C->degree -= 1;
-    A->degree -= 1;
+    std::cout << "i am meeting bare minimum expectations" << std::endl;
 
-    //delete D?
+    //check validity
+    bool skip = false;
+    std::unordered_set<string> neighborVerts = {};
+    HE *currhe = D->halfedge;
+    do {
+        neighborVerts.insert(currhe->twin->vertex->randid);
+        currhe = currhe->twin->next;
+//        std::cout << "here" <<std::endl;
+    } while (currhe != D->halfedge);
 
-    B->position = (B->position + D->position)/2.f;
-    D->position = B->position;
+    HE *currhe2 = B->halfedge;
+    do {
+        if (neighborVerts.find(currhe2->twin->vertex->randid) != neighborVerts.end()){
+            if (getNumNeighbors(currhe2->twin->vertex) == 3){
+                skip = true;
+            }
+        }
+        currhe2 = currhe2->twin->next;
+    } while (currhe2 != B->halfedge);
 
-    //delete D, DC, DB, BD, CD, DA, AD, one, two, edCD, edDA, edDB
-    _HEfaces.erase(one->randid);
-    delete one;
-    _HEfaces.erase(two->randid);
-    delete two;
+    std::cout << skip << std::endl;
 
-    _HEverts.erase(D->randid);
-    delete D;
+    if (!skip){
+        C->degree -= 1;
+        A->degree -= 1;
+        B->degree += 2;
 
-    _edges.erase(edCD->randid);
-    delete edCD;
-    _edges.erase(edDA->randid);
-    delete edDA;
-    _edges.erase(edDB->randid);
-    delete edDB;
+        //delete D?
 
-    _halfedges.erase(DB->randid);
-    delete DB;
-    _halfedges.erase(BD->randid);
-    delete BD;
-    _halfedges.erase(CD->randid);
-    delete CD;
-    _halfedges.erase(DA->randid);
-    delete DA;
-    _halfedges.erase(BC->randid);
-    delete BC;
-    _halfedges.erase(AB->randid);
-    delete AB;
+        B->position = (B->position + D->position)/2.f;
+        D->position = B->position;
 
-    CB->twin = DC;
-    BA->twin = AD;
+        //delete D, DC, DB, BD, CD, DA, AD, one, two, edCD, edDA, edDB
+        _HEfaces.erase(one->randid);
+        delete one;
+        _HEfaces.erase(two->randid);
+        delete two;
 
-    //top middle
-    DC->vertex = B;
-    DC->edge = edBC;
-    DC->twin = CB;
+        _HEverts.erase(D->randid);
+        delete D;
 
-    //bottom middle
-    AD->twin = BA;
-    AD->edge = edAB;
+//        std::cout << "erased: " << edCD->randid << " " << edDA->randid << " " << edDB->randid << std::endl;
+        _edges.erase(edCD->randid);
+        delete edCD;
+        _edges.erase(edDA->randid);
+        delete edDA;
+        _edges.erase(edDB->randid);
+        delete edDB;
 
-    HE *curr = DC;
-    curr = curr->next->next->twin;
-    while (curr->next->next != AD){
-        curr->vertex = B;
+        std::cout << "erased: " << DB->randid << " " << BD->randid << " " << CD->randid << " " << DA->randid << " " << BC->randid << " " << AB->randid <<std::endl;
+        _halfedges.erase(DB->randid);
+        delete DB;
+        _halfedges.erase(BD->randid);
+        delete BD;
+        _halfedges.erase(CD->randid);
+        delete CD;
+        _halfedges.erase(DA->randid);
+        delete DA;
+        _halfedges.erase(BC->randid);
+        delete BC;
+        _halfedges.erase(AB->randid);
+        delete AB;
+
+        CB->twin = DC;
+        BA->twin = AD;
+
+        //top middle
+        DC->vertex = B;
+        DC->edge = edBC;
+        DC->twin = CB;
+
+        //bottom middle
+        AD->twin = BA;
+        AD->edge = edAB;
+
+        C->halfedge = CB;
+        A->halfedge = AD;
+        B->halfedge = BA;
+
+        HE *curr = DC;
         curr = curr->next->next->twin;
+        while (curr->next->next != AD){
+            curr->vertex = B;
+            curr = curr->next->next->twin;
+        }
+        curr->vertex = B;
     }
-    curr->vertex = B;
+
+//    HE *boo = B->halfedge;
+//    do{
+//        std::cout<< boo->randid << std::endl;
+//        boo = boo->twin;
+//        std::cout<< boo->randid << std::endl;
+//        boo = boo->next;
+//    }while(boo != B->halfedge);
+
+    std::cout << "one collapse" << std::endl;
+}
+
+void Mesh::setFaceQuadric(Face *f){
+    Vertex *v1 = f->halfedge->vertex;
+    Vertex *v2 = f->halfedge->next->vertex;
+    Vertex *v3 = f->halfedge->next->next->vertex;
+    Vector3f AB = v2->position - v1->position;
+    Vector3f AC = v3->position - v1->position;
+    Vector3f normal = AB.cross(AC);
+    normal.normalize();
+//    Vector3f p = (v1->position+v2->position+v3->position)/3.f;
+    Vector3f p = v1->position;
+    float d = (-normal).dot(p);
+
+    Vector4f v(normal[0], normal[1], normal[2], d);
+    Matrix4f q = v*v.transpose();
+    f->q = q;
+}
+
+void Mesh::setVertexQuadric(Vertex *v){
+    HE *currhe = v->halfedge;
+    Matrix4f quadric = Matrix4f::Zero();
+    do {
+//        setFaceQuadric(currhe->face);
+        quadric += currhe->face->q;
+        currhe = currhe->twin->next;
+    } while (currhe != v->halfedge);
+    v->q = quadric;
+}
+
+void Mesh::setEdgeQuadric(Edge *e){
+//    setVertexQuadric(e->halfedge->vertex);
+//    setVertexQuadric(e->halfedge->twin->vertex);
+    Matrix4f quad = e->halfedge->vertex->q;
+    quad += e->halfedge->twin->vertex->q;
+    e->q = quad;
+//    Matrix3f A = quad.block<3,3>(0,0);
+    Matrix4f A;
+    A << quad(0,0), quad(0,1), quad(0,2), quad(0,3),
+            quad(0,1), quad(1,1), quad(1,2), quad(1,3),
+            quad(0,2), quad(1,2), quad(2,2), quad(2,3),
+            0.f, 0.f, 0.f, 1.f;
+//    Vector3f b(-quad(0, 3), -quad(1, 3), -quad(2,3));
+    Vector4f b(0.f, 0.f, 0.f, 1.f);
+    Vector4f cp = A.inverse()*b;
+    e->collapsepoint = Vector3f(cp[0], cp[1], cp[2]);//cp;
+    Vector4f x(cp[0], cp[1], cp[2], 1.f);
+    float cost = x.transpose() * e->q * x; //store this also?
+}
+
+void Mesh::setQuadrics(){
+    for (auto it = _HEfaces.begin(); it != _HEfaces.end(); ++it ){
+        Face *f = it->second;
+        setFaceQuadric(f);
+    }
+    for (auto it = _HEverts.begin(); it != _HEverts.end(); ++it ){
+        Vertex *v = it->second;
+        setVertexQuadric(v);
+    }
+    for (auto it = _edges.begin(); it != _edges.end(); ++it ){
+        Edge *e = it->second;
+        setEdgeQuadric(e);
+    }
 }
 
 void Mesh::simplify(){
-    std::vector<Edge*> newedges;
-    std::vector<Edge*> edgecopy;
-    std::unordered_map<std::string, Vertex*> oldverts;
-    std::unordered_map<std::string, Vector3f> newpos;
-    int count = 0;
-    for (auto it = _edges.begin(); it != _edges.end(); ++it ){
-        Edge *e = it->second;
-        edgecopy.push_back(e);
+    // get quadric for each vertex
+    // get quadric for each edge
+    // build 3x3 matrix for optimal collapsed point E
+    // get error value and use as key in priority queue, with optimal point as value
+
+    //build quadric matrix for each face
+    //quadric for each vertex = sum of quadrics at all adjacent faces
+    //for each edge, make "EdgeRecord" and insert into priorityqueue
+    //collapse cheapest edge, set quadric at new vertex to sum of quadrics at endpoints of original edge
+    //update cost of any edge connected to new vertex
+
+//    while(_faces.size() > 15){
+    for (int i = 0; i < 3; i++){
+        int count = 0;
+        setQuadrics();
+
+//        std::set<Edge*, costCompare> costs;
+        priority_queue<Edge*, std::vector<Edge*>, costCompare> costs;
+        for (auto it = _edges.begin(); it != _edges.end(); ++it ){
+//            std::cout << count << std::endl;
+            Edge *e = it->second;
+            setEdgeQuadric(e);
+            costs.push(e);
+            count++;
+        }
+        Edge *top = costs.top();
+        std::cout << top->randid << std::endl;
+        std::cout << top->halfedge->randid << std::endl;
+        std::cout << "hit" << std::endl;
+
+        collapse(top->halfedge);
+        std::cout << "here" << std::endl;
+
     }
-    for(Edge *e : edgecopy){
-        std::cout << count << std::endl;
-        collapse(e->halfedge);
-        count++;
-        break;
-    }
-    edgecopy.clear();
+
+
+//    std::vector<Edge*> newedges;
+//    std::vector<Edge*> edgecopy;
+//    std::unordered_map<std::string, Vertex*> oldverts;
+//    std::unordered_map<std::string, Vector3f> newpos;
+//    int count = 0;
+//    for (auto it = _edges.begin(); it != _edges.end(); ++it ){
+//        Edge *e = it->second;
+//        edgecopy.push_back(e);
+//    }
+//    for(Edge *e : edgecopy){
+//        std::cout << count << std::endl;
+//        collapse(e->halfedge);
+//        count++;
+//        break;
+//    }
+//    edgecopy.clear();
 }
 
 void Mesh::subdivide(){
@@ -660,6 +798,17 @@ std::string Mesh::random_string(){
     std::string str(12,0);
     std::generate_n( str.begin(), 12, randchar );
     return str;
+}
+
+
+int Mesh::getNumNeighbors(Vertex *v){
+    HE *currhe = v->halfedge;
+    int count = 0;
+    do {
+        currhe = currhe->twin->next;
+        count++;
+    } while (currhe != v->halfedge);
+    return count;
 }
 
 

@@ -26,6 +26,7 @@ struct hash_pair {
     }
 };
 
+
 struct Vertex;
 struct Edge;
 struct Face;
@@ -44,11 +45,15 @@ struct Vertex{
     Eigen::Vector3f position;
     int degree;
     std::string randid;
+    Eigen::Matrix4f q;
 };
 
 struct Edge{
     HE *halfedge;
     std::string randid;
+    Eigen::Matrix4f q;
+    Eigen::Vector3f collapsepoint;
+    float cost;
 //    Vertex *vert1;
 //    Vertex *vert2;
 //    Eigen::Vector3f vert1;
@@ -58,6 +63,7 @@ struct Edge{
 struct Face{
     HE *halfedge;
     std::string randid;
+    Eigen::Matrix4f q;
 //    Eigen::Vector3i verts;
 //    Eigen::Vector3f normal;
 };
@@ -65,6 +71,13 @@ struct Face{
 struct VertTracker{
     int degree;
     Vertex *vert;
+};
+
+struct costCompare {
+    bool operator()(const Edge* lhs, const Edge* rhs)
+    {
+        return lhs->cost < rhs->cost;
+    }
 };
 
 class Mesh
@@ -85,6 +98,10 @@ public:
     void collapse(HE *halfedge);
     void subdivide();
     void simplify();
+    void setFaceQuadric(Face *f);
+    void setVertexQuadric(Vertex *v);
+    void setEdgeQuadric(Edge *e);
+    void setQuadrics();
 
 private:
     std::vector<Eigen::Vector3f> _vertices;
