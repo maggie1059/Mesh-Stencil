@@ -67,6 +67,8 @@ int main(int argc, char *argv[])
 //        m.subdivide();
 //        m.subdivide();
         m.simplify();
+//        m.denoise();
+//        m.createNoisySphere();
     } else if (method == "simplify"){
         //TODO
     } else if (method == "remesh"){

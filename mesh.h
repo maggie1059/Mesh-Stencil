@@ -97,13 +97,18 @@ public:
     void fun2();
     void flip(HE *halfedge);
     void split(HE *halfedge, std::vector<Edge*> &newedges, const std::unordered_map<std::string, Vertex*> &oldverts);
-    void collapse(HE *halfedge, Eigen::Vector3f cp);
+    void collapse(HE *halfedge, Eigen::Vector3f cp, unordered_set<string> &skip);
     void subdivide();
     void simplify();
     void setFaceQuadric(Face *f);
     void setVertexQuadric(Vertex *v);
     void setEdgeQuadric(Edge *e);
     void setQuadrics();
+    void denoise();
+    Eigen::Vector3f denoisePoint(Vertex *v);
+    Eigen::Vector3f getVertexNormal(Vertex *v);
+    void createNoisySphere();
+    void getNeighborSet(Vertex *v, unordered_set<string> &neighbors, Eigen::Vector3f pos);
 
 private:
     std::vector<Eigen::Vector3f> _vertices;
