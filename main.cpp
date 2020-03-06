@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
         m.simplify(iter);
     } else if (method == "remesh"){
     } else if (method == "denoise") {
-//        m.createNoisySphere();
+//        m.createNoisySphere(); //this was used to create a noisy sphere for testing
         for (int i = 0; i < iter; i++){
             m.denoise(s_c, s_s, kernel);
         }
@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
     auto duration = duration_cast<milliseconds>(t1-t0).count();
 
     cout << "Execution takes: " << duration << " milliseconds." <<endl;
-    // TODO
+
     // Convert your datastructure back to the basic format
     m.convertToOBJ();
     ////////////////////////////////////////////////////////////////////////////////

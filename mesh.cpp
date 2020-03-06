@@ -677,19 +677,10 @@ void Mesh::subdivide(){
 }
 
 Vector3f Mesh::denoisePoint(Vertex *v, float s_c, float s_s, float kernel){
-//    float s_c = 3.5;
-//    float s_s = 10;
-//    float s_c = 0.5;
-//    float s_s = 10;
     Vector3f normal = getVertexNormal(v);
     std::unordered_set<string> neighbors = {};
     getNeighborSet(v, neighbors, v->position, 0, kernel);
     neighbors.erase(v->randid);
-//    HE *currhe = v->halfedge;
-//    do {
-//        neighbors.insert(currhe->twin->vertex->randid);
-//        currhe = currhe->twin->next;
-//    } while (currhe != v->halfedge);
     int K = neighbors.size();
     std::cout<< K << std::endl;
     float sum = 0;
@@ -697,8 +688,8 @@ Vector3f Mesh::denoisePoint(Vertex *v, float s_c, float s_s, float kernel){
     for (auto it = neighbors.begin(); it != neighbors.end(); ++it){
         Vertex *curr = _HEverts[*it];
         float t = (v->position - curr->position).norm();
-        float h = normal.dot(v->position - curr->position);
-//        float h = normal.dot(curr->position - v->position);
+//        float h = normal.dot(v->position - curr->position);
+        float h = normal.dot(curr->position - v->position);
         float w_c = exp(-pow(t, 2)/(2*pow(s_c, 2)));
         float w_s = exp(-pow(h, 2)/(2*pow(s_s, 2)));
         sum += (w_c*w_s)*h;
@@ -844,7 +835,6 @@ Vector3f Mesh::getVertexNormal(Vertex *v){
 }
 
 void Mesh::getNeighborSet(Vertex *v, unordered_set<string> &neighbors, Vector3f pos, int depth, float kernel){
-//    float kernel_size = kernel;
     HE *currhe = v->halfedge;
     do {
         float x = pos[0] - currhe->twin->vertex->position[0];
@@ -854,7 +844,6 @@ void Mesh::getNeighborSet(Vertex *v, unordered_set<string> &neighbors, Vector3f 
         dist = sqrt(dist);
 //        Vector3f distance = v->position-currhe->twin->vertex->position;
 //        std::cout<< "dist: " << dist <<std::endl;
-
         if (dist > 0.f && dist < kernel){
             neighbors.insert(currhe->twin->vertex->randid);
             if (depth < 2){

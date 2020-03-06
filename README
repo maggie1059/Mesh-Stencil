@@ -1,0 +1,41 @@
+Mesh README
+
+To run my code, please write command line arguments in the follow order:
+-source obj file
+-output obj file name
+-method ("subdivide", "simplify", or "denoise")
+-number of iterations (this will translate to number of faces to remove for "simplify")
+-sigma_c
+-sigma_s
+-kernel size
+
+The last 4 arguments are optional. If no "number of iterations" is provided, it will default to 1 for all methods. The last three arguments are used for denoising.
+
+My submitted images are in the "final images" folder in the root directory. All are shown with wireframes. The corresponding obj files are in the "final objs" folder. These are the images and arguments for each method for those images:
+
+Subdivision:
+1) input: icosahedron_input.obj (subdiv_orig)
+	output: subdiv_icos (3 subdivisions)
+2) input: bunny.obj (subdiv_bunny_orig)
+	output: subdiv_bunny (1 subdivision)
+
+Simplification:
+1) input: cow.obj (simp_orig - 5804 faces)
+	output: simp_cow (removed 2000 faces)
+2) input: cow.obj (simp_orig - 5804 faces)
+	output: super_simp_cow (removed 5000 faces)
+
+Denoising:
+1) input: 
+2) input:
+
+
+Data structures:
+
+I used a half-edge data structure representation of the mesh to work with, represented as structs of (mainly) pointers in the Mesh.h file. This included a HE (halfedge) struct, a Vertex struct, a Face struct, and an Edge struct, the last three having pointers to (one of) their corresponding halfedge.
+
+For subdivision to run in linear time, both split() and flip() were implemented in linear time (when operating across the full mesh), where each of the methods worked in constant time, given a halfedge. This was done by resetting pointers in each of the structs used for the halfedge data structure representation. Whenever a new struct was created to represent a halfedge/vertex/face/edge, they were assigned a random string ID and stored in an unordered map for future access.
+
+Simplification was implemented using the collapse() method, which also runs in linear time with constant operations on a single halfedge, using reassignments of pointers within structs. However, there are a lot more error-checking conditions in collapse(), which does make it run slower. For example, I check if a collapse is valid by checking if each endpoint of the collapsing edge has more than 2 neighbors, and by checking if any triangles will flip normals as a result of the collapse, and only proceed if neither of these is true. At the end, I also traverse all affected vertices/edges/faces to update their quadric errors and the cost of edges. I store the costs in a priority queue to find the best edge to collapse (avoiding putting edges that shouldn't be collapsed into the pq), which brings the total runtime to O(n^2) after the number of faces desired is reached.
+
+For denoising, I used a set to keep track of all neighbors within the kernel-size distance from the current vertex, and finding these neighbors happens in constant time (linear for full mesh). Then, constant operations are performed on all those neighbors before a vertex's position is adjusted. This results in linear runtime for the full mesh.
