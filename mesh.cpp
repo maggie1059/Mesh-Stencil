@@ -84,7 +84,7 @@ void Mesh::loadFromFile(const std::string &filePath)
             for(size_t v = 0; v < fv; v++) {
                 tinyobj::index_t idx = shapes[s].mesh.indices[index_offset + v];
 
-		face[v] = idx.vertex_index;
+                face[v] = idx.vertex_index;
 
             }
             _faces.push_back(face);
@@ -99,13 +99,12 @@ void Mesh::loadFromFile(const std::string &filePath)
 }
 
 void Mesh::convertToHE(){
-    int count = 0;
     for (Vector3i face : _faces){
-        std::cout << count <<std::endl;
-        count++;
         int iv1 = face[0];
         int iv2 = face[1];
         int iv3 = face[2];
+
+//reminder: this IS zero-indexed now
         Vector3f v1 = _vertices[iv1];
         Vector3f v2 = _vertices[iv2];
         Vector3f v3 = _vertices[iv3];
@@ -117,11 +116,11 @@ void Mesh::convertToHE(){
         Vector3f centroid = (v1+v2+v3)/3.f;
         centroid.normalize();
 
-        if (normal.dot(centroid) < 0){
-            std::swap(v2, v3);
-            std::swap(iv2, iv3);
-            normal = -normal;
-        }
+//        if (normal.dot(centroid) < 0){
+//            std::swap(v2, v3);
+//            std::swap(iv2, iv3);
+//            normal = -normal;
+//        }
         HE *he1 = new HE{NULL, NULL, NULL, NULL, NULL, random_string()}; //twin, next, vertex, edge, face
         HE *he2 = new HE{NULL, NULL, NULL, NULL, NULL, random_string()};
         HE *he3 = new HE{NULL, NULL, NULL, NULL, NULL, random_string()};
@@ -186,8 +185,6 @@ void Mesh::convertToHE(){
 
         if (_idkmap.find(std::pair<int,int>(iv2, iv3)) == _idkmap.end() && _idkmap.find(std::pair<int,int>(iv3, iv2)) == _idkmap.end()){
 //            Edge *e2 = new Edge{he2, _vertidx[iv2].vert, _vertidx[iv3].vert};
-//            std::cout << "getting here" <<std::endl;
-
             Edge *e2 = new Edge{he2, random_string(), Matrix4f::Zero(), Vector3f(0,0,0), 0};
 
             he2->edge = e2;
@@ -196,8 +193,6 @@ void Mesh::convertToHE(){
             _edges[e2->randid] = e2;
             _idkmap[std::pair<int,int>(iv2, iv3)] = he2;
         } else {
-//            std::cout << "getting here2 " << _idkmap[std::pair<int,int>(iv3, iv2)] <<std::endl;
-
             Edge *blah = _idkmap[std::pair<int,int>(iv3, iv2)]->edge;
 
             he2->edge = blah;
@@ -635,7 +630,7 @@ void Mesh::simplify(){
             setEdgeQuadric(e);
             costs.push(e);
         }
-        std::cout << count << std::endl;
+//        std::cout << count << std::endl;
 
         count++;
         Edge *top = costs.top();
@@ -711,7 +706,7 @@ void Mesh::subdivide(){
 void Mesh::convertToOBJ(){
     _vertices.clear();
     _faces.clear();
-//    int count = 0;
+    int count = 0;
 //    for (auto it = _HEfaces.begin(); it != _HEfaces.end(); ++it){
 //        Edge *e = it->second;
 //        edgecopy.push_back(e);
@@ -720,7 +715,8 @@ void Mesh::convertToOBJ(){
 //    for (Face *f : _HEfaces){
 //        std::cout << _HEfaces.size() << std::endl;
 //        count = 0;
-//        count += 1;
+//        std::cout << count << std::endl;
+        count += 1;
         Face *f = it->second;
         std::vector<int> idx;
         idx.reserve(3);

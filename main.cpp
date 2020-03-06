@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
     // Convert the mesh into your own data structure
 //    m.fun();
     m.convertToHE();
-    std::cout << "in main" <<std::endl;
+//    std::cout << "in main" <<std::endl;
     // TODO
     // Implement the operations
     if (method == "subdivide"){
@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
 //        m.subdivide();
 //        m.subdivide();
 //        m.subdivide();
-        m.simplify();
+//        m.simplify();
     } else if (method == "simplify"){
         //TODO
     } else if (method == "remesh"){
