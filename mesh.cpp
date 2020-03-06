@@ -160,6 +160,7 @@ void Mesh::convertToHE(){
 
         if (_idkmap.find(std::pair<int,int>(iv1, iv2)) == _idkmap.end() && _idkmap.find(std::pair<int,int>(iv2, iv1)) == _idkmap.end()){
 //            Edge *e1 = new Edge{he1, _vertidx[iv1].vert, _vertidx[iv2].vert};
+//            Edge *e1 = new Edge{he1, random_string(), Matrix4f::Zero(), Vector3f(0,0,0), Vector4f(0,0,0,0)};
             Edge *e1 = new Edge{he1, random_string(), Matrix4f::Zero(), Vector3f(0,0,0), 0};
             he1->edge = e1;
 //            _edges.emplace_back(e1);
@@ -185,6 +186,7 @@ void Mesh::convertToHE(){
 
         if (_idkmap.find(std::pair<int,int>(iv2, iv3)) == _idkmap.end() && _idkmap.find(std::pair<int,int>(iv3, iv2)) == _idkmap.end()){
 //            Edge *e2 = new Edge{he2, _vertidx[iv2].vert, _vertidx[iv3].vert};
+//            Edge *e2 = new Edge{he2, random_string(), Matrix4f::Zero(), Vector3f(0,0,0), Vector4f(0,0,0,0)};
             Edge *e2 = new Edge{he2, random_string(), Matrix4f::Zero(), Vector3f(0,0,0), 0};
 
             he2->edge = e2;
@@ -214,7 +216,9 @@ void Mesh::convertToHE(){
 
         if (_idkmap.find(std::pair<int,int>(iv3, iv1)) == _idkmap.end() && _idkmap.find(std::pair<int,int>(iv1, iv3)) == _idkmap.end()){
 //            Edge *e3 = new Edge{he3, _vertidx[iv3].vert, _vertidx[iv1].vert};
+//            Edge *e3 = new Edge{he3, random_string(), Matrix4f::Zero(), Vector3f(0,0,0), Vector4f(0,0,0,0)};
             Edge *e3 = new Edge{he3, random_string(), Matrix4f::Zero(), Vector3f(0,0,0), 0};
+
             he3->edge = e3;
 //            _edges.emplace_back(e3);
             _edges[e3->randid] = e3;
@@ -343,6 +347,10 @@ void Mesh::split(HE *halfedge, std::vector<Edge*> &newedges, const std::unordere
     _halfedges[BE->randid] = BE;
     _halfedges[ED->randid] = ED;
     _halfedges[DE->randid] = DE;
+
+//    Edge *edEC = new Edge{EC, random_string(), Matrix4f::Zero(), Vector3f(0,0,0), Vector4f(0,0,0,0)};
+//    Edge *edEB = new Edge{EB, random_string(), Matrix4f::Zero(), Vector3f(0,0,0), Vector4f(0,0,0,0)};
+//    Edge *edED = new Edge{ED, random_string(), Matrix4f::Zero(), Vector3f(0,0,0), Vector4f(0,0,0,0)};
 
     Edge *edEC = new Edge{EC, random_string(), Matrix4f::Zero(), Vector3f(0,0,0), 0};
     Edge *edEB = new Edge{EB, random_string(), Matrix4f::Zero(), Vector3f(0,0,0), 0};
@@ -587,7 +595,11 @@ void Mesh::setEdgeQuadric(Edge *e){
     Vector4f cp = A.inverse()*b;
     e->collapsepoint = Vector3f(cp[0], cp[1], cp[2]);//cp;
     Vector4f x(cp[0], cp[1], cp[2], 1.f);
-    float cost = x.transpose() * e->q * x; //store this also?
+//    std::cout << x << std::endl;
+//    std::cout<< " " << std::endl;
+    float cost = x.transpose()*quad*x;
+//    cost.normalize();
+    e->cost = cost;
 }
 
 void Mesh::setQuadrics(){
@@ -642,24 +654,6 @@ void Mesh::simplify(){
 //        std::cout << "here" << std::endl;
 
     }
-
-
-//    std::vector<Edge*> newedges;
-//    std::vector<Edge*> edgecopy;
-//    std::unordered_map<std::string, Vertex*> oldverts;
-//    std::unordered_map<std::string, Vector3f> newpos;
-//    int count = 0;
-//    for (auto it = _edges.begin(); it != _edges.end(); ++it ){
-//        Edge *e = it->second;
-//        edgecopy.push_back(e);
-//    }
-//    for(Edge *e : edgecopy){
-//        std::cout << count << std::endl;
-//        collapse(e->halfedge);
-//        count++;
-//        break;
-//    }
-//    edgecopy.clear();
 }
 
 void Mesh::subdivide(){

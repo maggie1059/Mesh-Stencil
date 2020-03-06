@@ -77,6 +77,7 @@ struct VertTracker{
 struct costCompare {
     bool operator()(const Edge* lhs, const Edge* rhs)
     {
+//        return true;
         return lhs->cost < rhs->cost;
     }
 };
