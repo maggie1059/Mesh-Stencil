@@ -48,33 +48,46 @@ int main(int argc, char *argv[])
     QString outfile = args[1];
     QString method = args[2];
 
+    int iter;
+    float s_c;
+    float s_s;
+    float kernel;
+
+    if (args.size() == 3){
+        iter = 1;
+    }
+    if (args.size() == 4){
+        iter = args[3].toInt();
+    }
+    if(args.size() > 4){
+        s_c = args[4].toFloat();
+        s_s = args[5].toFloat();
+        kernel = args[6].toFloat();
+    }
+
     ////////////////////////////////////////////////////////////////////////////////
 
     Mesh m;
     m.loadFromFile(infile.toStdString());
 
     auto t0 = high_resolution_clock::now();
-    // TODO
-    // Convert the mesh into your own data structure
-//    m.fun();
+
+    // Convert the mesh into half edge data structure representation
     m.convertToHE();
-//    std::cout << "in main" <<std::endl;
-    // TODO
+
     // Implement the operations
     if (method == "subdivide"){
-        //TODO
-//        m.subdivide();
-//        m.subdivide();
-//        m.subdivide();
-        m.simplify();
-//        m.denoise();
-//        m.createNoisySphere();
+        for (int i = 0; i < iter; i++){
+            m.subdivide();
+        }
     } else if (method == "simplify"){
-        //TODO
+        m.simplify(iter);
     } else if (method == "remesh"){
-        //TODO
     } else if (method == "denoise") {
-        //TODO
+//        m.createNoisySphere();
+        for (int i = 0; i < iter; i++){
+            m.denoise(s_c, s_s, kernel);
+        }
     } else {
         cerr << "Error: Unknown method name" << endl;
     }
@@ -86,7 +99,6 @@ int main(int argc, char *argv[])
     // TODO
     // Convert your datastructure back to the basic format
     m.convertToOBJ();
-//    m.fun2();
     ////////////////////////////////////////////////////////////////////////////////
     m.saveToFile(outfile.toStdString());
 

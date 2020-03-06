@@ -55,18 +55,12 @@ struct Edge{
     Eigen::Matrix4f q;
     Eigen::Vector3f collapsepoint;
     float cost;
-//    Vertex *vert1;
-//    Vertex *vert2;
-//    Eigen::Vector3f vert1;
-//    Eigen::Vector3f vert2;
 };
 
 struct Face{
     HE *halfedge;
     std::string randid;
     Eigen::Matrix4f q;
-//    Eigen::Vector3i verts;
-//    Eigen::Vector3f normal;
 };
 
 struct VertTracker{
@@ -77,7 +71,6 @@ struct VertTracker{
 struct costCompare {
     bool operator()(const Edge* lhs, const Edge* rhs)
     {
-//        return true;
         return lhs->cost > rhs->cost;
     }
 };
@@ -93,31 +86,15 @@ public:
     void saveToFile(const std::string &filePath);
     void convertToHE();
     void convertToOBJ();
-    void fun();
-    void fun2();
-    void flip(HE *halfedge);
-    void split(HE *halfedge, std::vector<Edge*> &newedges, const std::unordered_map<std::string, Vertex*> &oldverts);
-    void collapse(HE *halfedge, Eigen::Vector3f cp, unordered_set<string> &skip);
-    void subdivide();
-    void simplify();
-    void setFaceQuadric(Face *f);
-    void setVertexQuadric(Vertex *v);
-    void setEdgeQuadric(Edge *e);
-    void setQuadrics();
-    void denoise();
-    Eigen::Vector3f denoisePoint(Vertex *v);
-    Eigen::Vector3f getVertexNormal(Vertex *v);
     void createNoisySphere();
-    void getNeighborSet(Vertex *v, unordered_set<string> &neighbors, Eigen::Vector3f pos);
+    void subdivide();
+    void simplify(int faces);
+    void denoise(float s_c, float s_s, float kernel);
 
 private:
     std::vector<Eigen::Vector3f> _vertices;
     std::vector<Eigen::Vector3i> _faces;
 
-//    std::vector<HE*> _halfedgeslist;
-//    std::vector<Vertex*> _HEverts;
-//    std::vector<Edge*> _edges;
-//    std::vector<Face*> _HEfaces;
     std::unordered_set<string> usedids = {};
 
     std::unordered_map<std::string, HE*> _halfedges;
@@ -126,11 +103,24 @@ private:
     std::unordered_map<std::string, Face*> _HEfaces;
 
     std::unordered_map<int, VertTracker> _vertidx; //used to keep vertices unique and get degree
-    std::unordered_map<std::pair<int, int>, HE*, hash_pair> _idkmap; //used to get twins
+    std::unordered_map<std::pair<int, int>, HE*, hash_pair> _edgepairs; //used to get twins
     std::unordered_map<std::string, int> _lastmap; //used to convert back to obj
     std::string random_string();
     Eigen::Vector3f adjustPos(Vertex *v);
+
+    void flip(HE *halfedge);
+    void split(HE *halfedge, std::vector<Edge*> &newedges, const std::unordered_map<std::string, Vertex*> &oldverts);
+    void collapse(HE *halfedge, Eigen::Vector3f cp, unordered_set<string> &skip);
+
+    void setFaceQuadric(Face *f);
+    void setVertexQuadric(Vertex *v);
+    void setEdgeQuadric(Edge *e);
+    void setQuadrics();
+    Eigen::Vector3f denoisePoint(Vertex *v, float s_c, float s_s, float kernel);
+    Eigen::Vector3f getVertexNormal(Vertex *v);
+
     int getNumNeighbors(Vertex *v);
+    void getNeighborSet(Vertex *v, unordered_set<string> &neighbors, Eigen::Vector3f pos, int depth, float kernel);
 };
 
 #endif // MESH_H
