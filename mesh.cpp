@@ -99,14 +99,16 @@ void Mesh::loadFromFile(const std::string &filePath)
 }
 
 void Mesh::convertToHE(){
+    int count = 0;
     for (Vector3i face : _faces){
+        std::cout << count <<std::endl;
+        count++;
         int iv1 = face[0];
         int iv2 = face[1];
         int iv3 = face[2];
         Vector3f v1 = _vertices[iv1];
         Vector3f v2 = _vertices[iv2];
         Vector3f v3 = _vertices[iv3];
-
         //take cross product, get normal, figure out orientation and swap verts if needed
         Vector3f AB = v2-v1;
         Vector3f AC = v3-v1;
@@ -132,6 +134,7 @@ void Mesh::convertToHE(){
 
 //        Face *f = new Face{he1, face, normal};
 //        Face *f = new Face{he1, normal};
+
         Face *f = new Face{he1, random_string(), Matrix4f::Zero()};
         he1->face = f;
         he2->face = f;
@@ -183,14 +186,22 @@ void Mesh::convertToHE(){
 
         if (_idkmap.find(std::pair<int,int>(iv2, iv3)) == _idkmap.end() && _idkmap.find(std::pair<int,int>(iv3, iv2)) == _idkmap.end()){
 //            Edge *e2 = new Edge{he2, _vertidx[iv2].vert, _vertidx[iv3].vert};
+//            std::cout << "getting here" <<std::endl;
+
             Edge *e2 = new Edge{he2, random_string(), Matrix4f::Zero(), Vector3f(0,0,0), 0};
+
             he2->edge = e2;
 //            _edges.emplace_back(e2);
+
             _edges[e2->randid] = e2;
             _idkmap[std::pair<int,int>(iv2, iv3)] = he2;
         } else {
+//            std::cout << "getting here2 " << _idkmap[std::pair<int,int>(iv3, iv2)] <<std::endl;
+
             Edge *blah = _idkmap[std::pair<int,int>(iv3, iv2)]->edge;
+
             he2->edge = blah;
+
             _idkmap[std::pair<int,int>(iv2, iv3)] = he2;
         }
 
@@ -407,26 +418,18 @@ void Mesh::collapse(HE *halfedge){
     HE *DB = halfedge->twin;
     HE *BC = DB->next;
     HE *CD = BC->next;
-    std::cout << DB->randid <<std::endl;
-    std::cout << CD->next->randid <<std::endl;
+//    std::cout << DA->randid <<std::endl;
+//    std::cout << CD->next->randid <<std::endl;
 
     //outer
     HE *CB = BC->twin;
-    std::cout << "crashing now" <<std::endl;
+//    std::cout << "crashing now" <<std::endl;
 //    std::cout << AB->randid <<std::endl;
     //crashes on next line
     HE *BA = AB->twin;
 
     HE *DC = CD->twin;
     HE *AD = DA->twin;
-
-//    HE *FD = DC->next->next;
-//    HE *DF = FD->twin;
-//    HE *KD = DF->next->next;
-//    HE *DK = KD->twin;
-//    HE *JD = DF->next->next;
-//    HE *DJ = JD->twin;
-//    HE *CF = DC->next;
 
     //delete CD, DA, AB, BC
 
@@ -448,7 +451,7 @@ void Mesh::collapse(HE *halfedge){
     Vertex *C = CD->vertex;
     Vertex *A = AB->vertex;
 
-    std::cout << "i am meeting bare minimum expectations" << std::endl;
+//    std::cout << "i am meeting bare minimum expectations" << std::endl;
 
     //check validity
     bool skip = false;
@@ -470,7 +473,7 @@ void Mesh::collapse(HE *halfedge){
         currhe2 = currhe2->twin->next;
     } while (currhe2 != B->halfedge);
 
-    std::cout << skip << std::endl;
+//    std::cout << skip << std::endl;
 
     if (!skip){
         C->degree -= 1;
@@ -499,7 +502,7 @@ void Mesh::collapse(HE *halfedge){
         _edges.erase(edDB->randid);
         delete edDB;
 
-        std::cout << "erased: " << DB->randid << " " << BD->randid << " " << CD->randid << " " << DA->randid << " " << BC->randid << " " << AB->randid <<std::endl;
+//        std::cout << "erased: " << DB->randid << " " << BD->randid << " " << CD->randid << " " << DA->randid << " " << BC->randid << " " << AB->randid <<std::endl;
         _halfedges.erase(DB->randid);
         delete DB;
         _halfedges.erase(BD->randid);
@@ -529,6 +532,9 @@ void Mesh::collapse(HE *halfedge){
         A->halfedge = AD;
         B->halfedge = BA;
 
+        edBC->halfedge = CB;
+        edAB->halfedge = BA;
+
         HE *curr = DC;
         curr = curr->next->next->twin;
         while (curr->next->next != AD){
@@ -538,15 +544,7 @@ void Mesh::collapse(HE *halfedge){
         curr->vertex = B;
     }
 
-//    HE *boo = B->halfedge;
-//    do{
-//        std::cout<< boo->randid << std::endl;
-//        boo = boo->twin;
-//        std::cout<< boo->randid << std::endl;
-//        boo = boo->next;
-//    }while(boo != B->halfedge);
-
-    std::cout << "one collapse" << std::endl;
+//    std::cout << "one collapse" << std::endl;
 }
 
 void Mesh::setFaceQuadric(Face *f){
@@ -623,28 +621,30 @@ void Mesh::simplify(){
     //for each edge, make "EdgeRecord" and insert into priorityqueue
     //collapse cheapest edge, set quadric at new vertex to sum of quadrics at endpoints of original edge
     //update cost of any edge connected to new vertex
+    int count = 0;
+    int target = _HEfaces.size()/2.f;
 
-//    while(_faces.size() > 15){
-    for (int i = 0; i < 3; i++){
-        int count = 0;
+//    while(_HEfaces.size() > target){
+    for (int i = 0; i < 100; i++){
         setQuadrics();
 
 //        std::set<Edge*, costCompare> costs;
         priority_queue<Edge*, std::vector<Edge*>, costCompare> costs;
         for (auto it = _edges.begin(); it != _edges.end(); ++it ){
-//            std::cout << count << std::endl;
             Edge *e = it->second;
             setEdgeQuadric(e);
             costs.push(e);
-            count++;
         }
+        std::cout << count << std::endl;
+
+        count++;
         Edge *top = costs.top();
-        std::cout << top->randid << std::endl;
-        std::cout << top->halfedge->randid << std::endl;
-        std::cout << "hit" << std::endl;
+//        std::cout << top->randid << std::endl;
+//        std::cout << top->halfedge->randid << std::endl;
+//        std::cout << "hit" << std::endl;
 
         collapse(top->halfedge);
-        std::cout << "here" << std::endl;
+//        std::cout << "here" << std::endl;
 
     }
 
@@ -797,7 +797,14 @@ std::string Mesh::random_string(){
     };
     std::string str(12,0);
     std::generate_n( str.begin(), 12, randchar );
-    return str;
+    if (usedids.find(str) != usedids.end()){
+        return random_string();
+    }
+    else{
+        usedids.insert(str);
+        return str;
+    }
+//    return str;
 }
 
 

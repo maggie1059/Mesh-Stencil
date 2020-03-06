@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <functional>
 #include <Eigen/Geometry>
+#include <unordered_set>
 
 #include <string>
 #include <utility>
@@ -111,6 +112,7 @@ private:
 //    std::vector<Vertex*> _HEverts;
 //    std::vector<Edge*> _edges;
 //    std::vector<Face*> _HEfaces;
+    std::unordered_set<string> usedids = {};
 
     std::unordered_map<std::string, HE*> _halfedges;
     std::unordered_map<std::string, Vertex*> _HEverts;
