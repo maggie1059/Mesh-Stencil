@@ -97,7 +97,7 @@ public:
     void fun2();
     void flip(HE *halfedge);
     void split(HE *halfedge, std::vector<Edge*> &newedges, const std::unordered_map<std::string, Vertex*> &oldverts);
-    void collapse(HE *halfedge);
+    void collapse(HE *halfedge, Eigen::Vector3f cp);
     void subdivide();
     void simplify();
     void setFaceQuadric(Face *f);

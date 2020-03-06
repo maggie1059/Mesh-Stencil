@@ -412,7 +412,7 @@ void Mesh::split(HE *halfedge, std::vector<Edge*> &newedges, const std::unordere
 //    std::cout << "stop" << std::endl;
 }
 
-void Mesh::collapse(HE *halfedge){
+void Mesh::collapse(HE *halfedge, Vector3f cp){
 
     //inner
     HE *BD = halfedge;
@@ -485,7 +485,7 @@ void Mesh::collapse(HE *halfedge){
 
         //delete D?
 
-        B->position = (B->position + D->position)/2.f;
+        B->position = cp;//(B->position + D->position)/2.f;
         D->position = B->position;
 
         //delete D, DC, DB, BD, CD, DA, AD, one, two, edCD, edDA, edDB
@@ -600,6 +600,7 @@ void Mesh::setEdgeQuadric(Edge *e){
     float cost = x.transpose()*quad*x;
 //    cost.normalize();
     e->cost = cost;
+//    std::cout << cost << std::endl;
 }
 
 void Mesh::setQuadrics(){
@@ -650,7 +651,7 @@ void Mesh::simplify(){
 //        std::cout << top->halfedge->randid << std::endl;
 //        std::cout << "hit" << std::endl;
 
-        collapse(top->halfedge);
+        collapse(top->halfedge, top->collapsepoint);
 //        std::cout << "here" << std::endl;
 
     }
