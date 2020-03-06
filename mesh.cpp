@@ -413,7 +413,8 @@ void Mesh::split(HE *halfedge, std::vector<Edge*> &newedges, const std::unordere
 }
 
 void Mesh::collapse(HE *halfedge, Vector3f cp){
-
+//    std::cout << "collapse point: " << cp <<std::endl;
+//    std::cout << " " <<std::endl;
     //inner
     HE *BD = halfedge;
     HE *DA = BD->next;
@@ -454,6 +455,12 @@ void Mesh::collapse(HE *halfedge, Vector3f cp){
     Vertex *C = CD->vertex;
     Vertex *A = AB->vertex;
 
+//    std::cout << "B: " << B->position <<std::endl;
+//    std::cout << " " <<std::endl;
+
+//    std::cout << "D: "<< D->position <<std::endl;
+//    std::cout << " " <<std::endl;
+
 //    std::cout << "i am meeting bare minimum expectations" << std::endl;
 
     //check validity
@@ -487,6 +494,7 @@ void Mesh::collapse(HE *halfedge, Vector3f cp){
 
         B->position = cp;//(B->position + D->position)/2.f;
         D->position = B->position;
+//        std::cout << "B again: " << B->position <<std::endl;
 
         //delete D, DC, DB, BD, CD, DA, AD, one, two, edCD, edDA, edDB
         _HEfaces.erase(one->randid);
@@ -561,9 +569,16 @@ void Mesh::setFaceQuadric(Face *f){
 //    Vector3f p = (v1->position+v2->position+v3->position)/3.f;
     Vector3f p = v1->position;
     float d = (-normal).dot(p);
+    float a = normal[0];
+    float b = normal[1];
+    float c = normal[2];
+    Vector4f v(a, b, c, d);
 
-    Vector4f v(normal[0], normal[1], normal[2], d);
-    Matrix4f q = v*v.transpose();
+    Matrix4f q; //= v*v.transpose();
+    q << a*a, a*b, a*c, a*d,
+            a*b, b*b, b*c, b*d,
+            a*c, b*c, c*c, c*d,
+            a*d, b*d, c*d, d*d;
     f->q = q;
 }
 
@@ -633,7 +648,7 @@ void Mesh::simplify(){
     int target = _HEfaces.size()/2.f;
 
 //    while(_HEfaces.size() > target){
-    for (int i = 0; i < 100; i++){
+    for (int i = 0; i < 20; i++){
         setQuadrics();
 
 //        std::set<Edge*, costCompare> costs;
@@ -642,6 +657,10 @@ void Mesh::simplify(){
             Edge *e = it->second;
             setEdgeQuadric(e);
             costs.push(e);
+//            if (i==19){
+//                std::cout << e->cost << std::endl;
+//            }
+
         }
 //        std::cout << count << std::endl;
 
@@ -650,7 +669,7 @@ void Mesh::simplify(){
 //        std::cout << top->randid << std::endl;
 //        std::cout << top->halfedge->randid << std::endl;
 //        std::cout << "hit" << std::endl;
-
+        std::cout << top->cost << std::endl;
         collapse(top->halfedge, top->collapsepoint);
 //        std::cout << "here" << std::endl;
 
