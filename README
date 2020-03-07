@@ -1,6 +1,6 @@
 Mesh README
 
-To run my code, please write command line arguments in the follow order:
+To run my code, please write command line arguments in the following order:
 -source obj file
 -output obj file name
 -method ("subdivide", "simplify", or "denoise")
@@ -25,9 +25,14 @@ Simplification:
 2) input: cow.obj (simp_orig - 5804 faces)
 	output: super_simp_cow (removed 5000 faces)
 
-Denoising:
-1) input: 
-2) input:
+Denoising (with and without wireframe):
+1) input: noisy_fandisk.obj (fandisk_orig, fandisk_orig_wireframe)
+	output: (5 iterations, s_c=0.5, s_s=10, kernel_size=2.0, depth=4)
+		fandisk_denoised, fandisk_denoise_wireframe
+		
+2) input: noisy_hi_bunny.obj (noisy_hi_bunny_orig, noisy_hi_bunny_orig_wireframe)
+	output: (3 iterations, s_c=0.01, s_s=10, kernel_size=0.2, depth=4)
+		noisy_hi_bunny_denoised, noisy_hi_bunny_denoised_wireframe
 
 
 Data structures:

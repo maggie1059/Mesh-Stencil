@@ -627,8 +627,7 @@ void Mesh::simplify(int faces){
     setQuadrics();
     std::unordered_set<string> skipEd = {};
 
-    while(_HEfaces.size() > target){ //if want to use proportion of original size as threshold
-//    for (int i = 0; i < faces; i++){
+    while(_HEfaces.size() > target){
         priority_queue<Edge*, std::vector<Edge*>, costCompare> costs;
         for (auto it = _edges.begin(); it != _edges.end(); ++it ){
             Edge *e = it->second;
@@ -682,18 +681,19 @@ Vector3f Mesh::denoisePoint(Vertex *v, float s_c, float s_s, float kernel){
     getNeighborSet(v, neighbors, v->position, 0, kernel);
     neighbors.erase(v->randid);
     int K = neighbors.size();
-    std::cout<< K << std::endl;
     float sum = 0;
     float normalizer = 0;
     for (auto it = neighbors.begin(); it != neighbors.end(); ++it){
         Vertex *curr = _HEverts[*it];
         float t = (v->position - curr->position).norm();
-//        float h = normal.dot(v->position - curr->position);
         float h = normal.dot(curr->position - v->position);
         float w_c = exp(-pow(t, 2)/(2*pow(s_c, 2)));
         float w_s = exp(-pow(h, 2)/(2*pow(s_s, 2)));
         sum += (w_c*w_s)*h;
         normalizer += w_c*w_s;
+    }
+    if (normalizer == 0){
+        return v->position;
     }
     Vector3f out = v->position + (normal*sum/normalizer);
     return out;
@@ -820,9 +820,9 @@ Vector3f Mesh::getVertexNormal(Vertex *v){
     int numFaces = 0;
     do {
         Face *f = currhe->face;
-        Vertex *v1 = f->halfedge->vertex;
-        Vertex *v2 = f->halfedge->next->vertex;
-        Vertex *v3 = f->halfedge->next->next->vertex;
+        Vertex *v1 = currhe->vertex;
+        Vertex *v2 = currhe->next->vertex;
+        Vertex *v3 = currhe->next->next->vertex;
         Vector3f AB = v2->position - v1->position;
         Vector3f AC = v3->position - v1->position;
         Vector3f normal = AB.cross(AC);
@@ -837,16 +837,17 @@ Vector3f Mesh::getVertexNormal(Vertex *v){
 void Mesh::getNeighborSet(Vertex *v, unordered_set<string> &neighbors, Vector3f pos, int depth, float kernel){
     HE *currhe = v->halfedge;
     do {
+        //euclidean distance
         float x = pos[0] - currhe->twin->vertex->position[0];
         float y = pos[1] - currhe->twin->vertex->position[1];
         float z = pos[2] - currhe->twin->vertex->position[2];
         float dist = pow(x,2) + pow(y,2) + pow(z,2);
         dist = sqrt(dist);
-//        Vector3f distance = v->position-currhe->twin->vertex->position;
-//        std::cout<< "dist: " << dist <<std::endl;
+
+        //recurse if neighbor is within kernel distance, increment depth to prevent infinite recursion
         if (dist > 0.f && dist < kernel){
             neighbors.insert(currhe->twin->vertex->randid);
-            if (depth < 2){
+            if (depth < 3){
                 getNeighborSet(currhe->twin->vertex, neighbors, pos, depth+1, kernel);
             }
         }
