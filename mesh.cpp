@@ -26,22 +26,22 @@ void Mesh::initFromVectors(const std::vector<Vector3f> &vertices,
 
 Mesh::~Mesh()
 {
-    for (auto it = _halfedges.begin(); it != _halfedges.end(); ++it){
-        HE *f = it->second;
-        delete f;
-    }
-    for (auto it = _HEverts.begin(); it != _HEverts.end(); ++it){
-        Vertex *f = it->second;
-        delete f;
-    }
-    for (auto it = _edges.begin(); it != _edges.end(); ++it){
-        Edge *f = it->second;
-        delete f;
-    }
-    for (auto it = _HEfaces.begin(); it != _HEfaces.end(); ++it){
-        Face *f = it->second;
-        delete f;
-    }
+//    for (auto it = _halfedges.begin(); it != _halfedges.end(); ++it){
+//        shared_ptr<HE> f = it->second;
+//        delete f;
+//    }
+//    for (auto it = _HEverts.begin(); it != _HEverts.end(); ++it){
+//        shared_ptr<Vertex> f = it->second;
+//        delete f;
+//    }
+//    for (auto it = _edges.begin(); it != _edges.end(); ++it){
+//        shared_ptr<Edge> f = it->second;
+//        delete f;
+//    }
+//    for (auto it = _HEfaces.begin(); it != _HEfaces.end(); ++it){
+//        shared_ptr<Face> f = it->second;
+//        delete f;
+//    }
 }
 
 void Mesh::loadFromFile(const std::string &filePath)
@@ -104,14 +104,19 @@ void Mesh::convertToHE(){
         Vector3f centroid = (v1+v2+v3)/3.f;
         centroid.normalize();
 
-        HE *he1 = new HE{NULL, NULL, NULL, NULL, NULL, random_string()};
-        HE *he2 = new HE{NULL, NULL, NULL, NULL, NULL, random_string()};
-        HE *he3 = new HE{NULL, NULL, NULL, NULL, NULL, random_string()};
+        shared_ptr<HE> he1(new HE{NULL, NULL, NULL, NULL, NULL, random_string()});
+        shared_ptr<HE> he2(new HE{NULL, NULL, NULL, NULL, NULL, random_string()});
+        shared_ptr<HE> he3(new HE{NULL, NULL, NULL, NULL, NULL, random_string()});
+
+//        shared_ptr<HE> he1 = new HE{NULL, NULL, NULL, NULL, NULL, random_string()};
+//        shared_ptr<HE> he2 = new HE{NULL, NULL, NULL, NULL, NULL, random_string()};
+//        shared_ptr<HE> he3 = new HE{NULL, NULL, NULL, NULL, NULL, random_string()};
         _halfedges[he1->randid] = he1;
         _halfedges[he2->randid] = he2;
-        _halfedges[he2->randid] = he2;
+        _halfedges[he3->randid] = he3;
 
-        Face *f = new Face{he1, random_string(), Matrix4f::Zero()};
+//        shared_ptr<Face> f = new Face{he1, random_string(), Matrix4f::Zero()};
+        shared_ptr<Face> f(new Face{he1, random_string(), Matrix4f::Zero()});
         he1->face = f;
         he2->face = f;
         he3->face = f;
@@ -122,7 +127,7 @@ void Mesh::convertToHE(){
         he3->next = he1;
 
         if (_vertidx.find(iv1) == _vertidx.end()){
-            Vertex *v1_he = new Vertex{he1, v1, 1, random_string(), Matrix4f::Zero()};
+            shared_ptr<Vertex> v1_he(new Vertex{he1, v1, 1, random_string(), Matrix4f::Zero()});
             he1->vertex = v1_he;
             _HEverts[v1_he->randid] = v1_he;
             _vertidx[iv1] = {1, v1_he};
@@ -133,18 +138,18 @@ void Mesh::convertToHE(){
         }
 
         if (_edgepairs.find(std::pair<int,int>(iv1, iv2)) == _edgepairs.end() && _edgepairs.find(std::pair<int,int>(iv2, iv1)) == _edgepairs.end()){
-            Edge *e1 = new Edge{he1, random_string(), Matrix4f::Zero(), Vector3f(0,0,0), 0};
+            shared_ptr<Edge> e1(new Edge{he1, random_string(), Matrix4f::Zero(), Vector3f(0,0,0), 0});
             he1->edge = e1;
             _edges[e1->randid] = e1;
             _edgepairs[std::pair<int,int>(iv1, iv2)] = he1;
         } else {
-            Edge *e = _edgepairs[std::pair<int,int>(iv2, iv1)]->edge;
+            shared_ptr<Edge> e = _edgepairs[std::pair<int,int>(iv2, iv1)]->edge;
             he1->edge = e;
             _edgepairs[std::pair<int,int>(iv1, iv2)] = he1;
         }
 
         if (_vertidx.find(iv2) == _vertidx.end()){
-            Vertex *v2_he = new Vertex{he2, v2, 1, random_string(), Matrix4f::Zero()};
+            shared_ptr<Vertex> v2_he(new Vertex{he2, v2, 1, random_string(), Matrix4f::Zero()});
             he2->vertex = v2_he;
             _HEverts[v2_he->randid] = v2_he;
             _vertidx[iv2] = {1, v2_he};
@@ -155,18 +160,18 @@ void Mesh::convertToHE(){
         }
 
         if (_edgepairs.find(std::pair<int,int>(iv2, iv3)) == _edgepairs.end() && _edgepairs.find(std::pair<int,int>(iv3, iv2)) == _edgepairs.end()){
-            Edge *e2 = new Edge{he2, random_string(), Matrix4f::Zero(), Vector3f(0,0,0), 0};
+            shared_ptr<Edge> e2(new Edge{he2, random_string(), Matrix4f::Zero(), Vector3f(0,0,0), 0});
             he2->edge = e2;
             _edges[e2->randid] = e2;
             _edgepairs[std::pair<int,int>(iv2, iv3)] = he2;
         } else {
-            Edge *e = _edgepairs[std::pair<int,int>(iv3, iv2)]->edge;
+            shared_ptr<Edge> e = _edgepairs[std::pair<int,int>(iv3, iv2)]->edge;
             he2->edge = e;
             _edgepairs[std::pair<int,int>(iv2, iv3)] = he2;
         }
 
         if (_vertidx.find(iv3) == _vertidx.end()){
-            Vertex *v3_he = new Vertex{he3, v3, 1, random_string(), Matrix4f::Zero()};
+            shared_ptr<Vertex> v3_he(new Vertex{he3, v3, 1, random_string(), Matrix4f::Zero()});
             he3->vertex = v3_he;
             _HEverts[v3_he->randid] = v3_he;
             _vertidx[iv3] = {1, v3_he};
@@ -177,13 +182,12 @@ void Mesh::convertToHE(){
         }
 
         if (_edgepairs.find(std::pair<int,int>(iv3, iv1)) == _edgepairs.end() && _edgepairs.find(std::pair<int,int>(iv1, iv3)) == _edgepairs.end()){
-            Edge *e3 = new Edge{he3, random_string(), Matrix4f::Zero(), Vector3f(0,0,0), 0};
-
+            shared_ptr<Edge> e3(new Edge{he3, random_string(), Matrix4f::Zero(), Vector3f(0,0,0), 0});
             he3->edge = e3;
             _edges[e3->randid] = e3;
             _edgepairs[std::pair<int,int>(iv3, iv1)] = he3;
         } else {
-            Edge *e = _edgepairs[std::pair<int,int>(iv1, iv3)]->edge;
+            shared_ptr<Edge> e = _edgepairs[std::pair<int,int>(iv1, iv3)]->edge;
             he3->edge = e;
             _edgepairs[std::pair<int,int>(iv3, iv1)] = he3;
         }
@@ -197,23 +201,23 @@ void Mesh::convertToHE(){
     }
 }
 
-void Mesh::flip(HE *halfedge){
-    HE *AB = halfedge; // 1
-    HE *BA = halfedge->twin; // 2
+void Mesh::flip(shared_ptr<HE> halfedge){
+    shared_ptr<HE> AB = halfedge; // 1
+    shared_ptr<HE> BA = halfedge->twin; // 2
 
-    HE *BC = halfedge->next; // 1
-    HE *CA = BC->next; // 1
+    shared_ptr<HE> BC = halfedge->next; // 1
+    shared_ptr<HE> CA = BC->next; // 1
 
-    HE *AD = BA->next; // 2
-    HE *DB = AD->next; // 2
+    shared_ptr<HE> AD = BA->next; // 2
+    shared_ptr<HE> DB = AD->next; // 2
 
-    Face *ABC = halfedge->face; // 1
-    Face *ADB = BA->face; // 2
+    shared_ptr<Face> ABC = halfedge->face; // 1
+    shared_ptr<Face> ADB = BA->face; // 2
 
-    Vertex *A = halfedge->vertex;
-    Vertex *B = BC->vertex;
-    Vertex *C = CA->vertex;
-    Vertex *D = DB->vertex;
+    shared_ptr<Vertex> A = halfedge->vertex;
+    shared_ptr<Vertex> B = BC->vertex;
+    shared_ptr<Vertex> C = CA->vertex;
+    shared_ptr<Vertex> D = DB->vertex;
 
     if (!(getNumNeighbors(A) == 3 || getNumNeighbors(B) == 3)){
         A->halfedge = AD;
@@ -241,28 +245,28 @@ void Mesh::flip(HE *halfedge){
     }
 }
 
-void Mesh::split(HE *halfedge, std::vector<Edge*> &newedges, const std::unordered_map<std::string, Vertex*> &oldverts){
-    HE *AB = halfedge; // 1
-    HE *BA = halfedge->twin; // 2
+void Mesh::split(shared_ptr<HE> halfedge, std::vector<shared_ptr<Edge>> &newedges, const std::unordered_map<std::string, shared_ptr<Vertex>> &oldverts){
+    shared_ptr<HE> AB = halfedge; // 1
+    shared_ptr<HE> BA = halfedge->twin; // 2
 
-    HE *BC = halfedge->next; // 1
-    HE *CA = BC->next; // 1
+    shared_ptr<HE> BC = halfedge->next; // 1
+    shared_ptr<HE> CA = BC->next; // 1
 
-    HE *AD = BA->next; // 2
-    HE *DB = AD->next; // 2
+    shared_ptr<HE> AD = BA->next; // 2
+    shared_ptr<HE> DB = AD->next; // 2
 
-    Edge *eddy = halfedge->edge;
+    shared_ptr<Edge> eddy = halfedge->edge;
 
-    Face *one = halfedge->face; // 1
-    Face *two = BA->face; // 2
+    shared_ptr<Face> one = halfedge->face; // 1
+    shared_ptr<Face> two = BA->face; // 2
 
-    Vertex *A = halfedge->vertex;
-    Vertex *B = BC->vertex;
-    Vertex *C = CA->vertex;
-    Vertex *D = DB->vertex;
+    shared_ptr<Vertex> A = halfedge->vertex;
+    shared_ptr<Vertex> B = BC->vertex;
+    shared_ptr<Vertex> C = CA->vertex;
+    shared_ptr<Vertex> D = DB->vertex;
 
     Vector3f position = (B->position*3.f/8.f) + (A->position*3.f/8.f) + (C->position*1.f/8.f) + (D->position*1.f/8.f);
-    Vertex *E = new Vertex{BA, position, 4, random_string()};
+    shared_ptr<Vertex> E(new Vertex{BA, position, 4, random_string()});
     _HEverts[E->randid] = E;
 
     BA->vertex = E;
@@ -271,12 +275,12 @@ void Mesh::split(HE *halfedge, std::vector<Edge*> &newedges, const std::unordere
     D->degree += 1;
 
     //update _lastmap, _HEverts
-    HE *EC = new HE{NULL, CA, E, NULL, NULL, random_string()};
-    HE *CE = new HE{EC, NULL, C, NULL, one, random_string()}; //next = EB
-    HE *EB = new HE{NULL, BC, E, NULL, one, random_string()};
-    HE *BE = new HE{EB, NULL, B, NULL, two, random_string()}; //next = ED
-    HE *ED = new HE{NULL, DB, E, NULL, two, random_string()};
-    HE *DE = new HE{ED, BA, D, NULL, NULL, random_string()};
+    shared_ptr<HE> EC(new HE{NULL, CA, E, NULL, NULL, random_string()});
+    shared_ptr<HE> CE(new HE{EC, NULL, C, NULL, one, random_string()}); //next = EB
+    shared_ptr<HE> EB(new HE{NULL, BC, E, NULL, one, random_string()});
+    shared_ptr<HE> BE(new HE{EB, NULL, B, NULL, two, random_string()}); //next = ED
+    shared_ptr<HE> ED(new HE{NULL, DB, E, NULL, two, random_string()});
+    shared_ptr<HE> DE(new HE{ED, BA, D, NULL, NULL, random_string()});
 
     EC->twin = CE;
     EB->twin = BE;
@@ -295,9 +299,9 @@ void Mesh::split(HE *halfedge, std::vector<Edge*> &newedges, const std::unordere
     _halfedges[ED->randid] = ED;
     _halfedges[DE->randid] = DE;
 
-    Edge *edEC = new Edge{EC, random_string(), Matrix4f::Zero(), Vector3f(0,0,0), 0};
-    Edge *edEB = new Edge{EB, random_string(), Matrix4f::Zero(), Vector3f(0,0,0), 0};
-    Edge *edED = new Edge{ED, random_string(), Matrix4f::Zero(), Vector3f(0,0,0), 0};
+    shared_ptr<Edge> edEC(new Edge{EC, random_string(), Matrix4f::Zero(), Vector3f(0,0,0), 0});
+    shared_ptr<Edge> edEB(new Edge{EB, random_string(), Matrix4f::Zero(), Vector3f(0,0,0), 0});
+    shared_ptr<Edge> edED(new Edge{ED, random_string(), Matrix4f::Zero(), Vector3f(0,0,0), 0});
 
     _edges[edEC->randid] = edEC;
     _edges[edEB->randid] = edEB;
@@ -317,8 +321,8 @@ void Mesh::split(HE *halfedge, std::vector<Edge*> &newedges, const std::unordere
     ED->edge = edED;
     DE->edge = edED;
 
-    Face *three = new Face{CA, random_string(), Matrix4f::Zero()};
-    Face *four = new Face{AD, random_string(), Matrix4f::Zero()};
+    shared_ptr<Face> three(new Face{CA, random_string(), Matrix4f::Zero()});
+    shared_ptr<Face> four(new Face{AD, random_string(), Matrix4f::Zero()});
 
     B->halfedge = BC;
     C->halfedge = CE;
@@ -341,51 +345,51 @@ void Mesh::split(HE *halfedge, std::vector<Edge*> &newedges, const std::unordere
     _HEfaces[four->randid] = four;
 }
 
-void Mesh::collapse(HE *halfedge, Vector3f cp, unordered_set<string> &skipEd){
+void Mesh::collapse(shared_ptr<HE> halfedge, Vector3f cp, unordered_set<string> &skipEd){
     //inner
-    HE *BD = halfedge;
-    HE *DA = BD->next;
-    HE *AB = DA->next;
-    HE *DB = halfedge->twin;
-    HE *BC = DB->next;
-    HE *CD = BC->next;
+    shared_ptr<HE> BD = halfedge;
+    shared_ptr<HE> DA = BD->next;
+    shared_ptr<HE> AB = DA->next;
+    shared_ptr<HE> DB = halfedge->twin;
+    shared_ptr<HE> BC = DB->next;
+    shared_ptr<HE> CD = BC->next;
 
     //outer
-    HE *CB = BC->twin;
-    HE *BA = AB->twin;
+    shared_ptr<HE> CB = BC->twin;
+    shared_ptr<HE> BA = AB->twin;
 
-    HE *DC = CD->twin;
-    HE *AD = DA->twin;
+    shared_ptr<HE> DC = CD->twin;
+    shared_ptr<HE> AD = DA->twin;
 
     //delete CD, DA, AB, BC
 
-    Face *one = DB->face;
-    Face *two = BD->face;
+    shared_ptr<Face> one = DB->face;
+    shared_ptr<Face> two = BD->face;
 
     //delete one, two
 
-    Edge *edCD = CD->edge;
-    Edge *edDA = DA->edge;
-    Edge *edAB = AB->edge;
-    Edge *edBC = BC->edge;
-    Edge *edDB = halfedge->edge;
+    shared_ptr<Edge> edCD = CD->edge;
+    shared_ptr<Edge> edDA = DA->edge;
+    shared_ptr<Edge> edAB = AB->edge;
+    shared_ptr<Edge> edBC = BC->edge;
+    shared_ptr<Edge> edDB = halfedge->edge;
 
-    Vertex *D = DA->vertex;
-    Vertex *B = BD->vertex;
-    Vertex *C = CD->vertex;
-    Vertex *A = AB->vertex;
+    shared_ptr<Vertex> D = DA->vertex;
+    shared_ptr<Vertex> B = BD->vertex;
+    shared_ptr<Vertex> C = CD->vertex;
+    shared_ptr<Vertex> A = AB->vertex;
 
     //check validity
     bool skip = false;
     std::unordered_set<string> neighborVerts = {};
-    HE *currhe = D->halfedge;
+    shared_ptr<HE> currhe = D->halfedge;
     do {
         neighborVerts.insert(currhe->twin->vertex->randid);
         currhe = currhe->twin->next;
     } while (currhe != D->halfedge);
 
     int count = 0;
-    HE *currhe2 = B->halfedge;
+    shared_ptr<HE> currhe2 = B->halfedge;
     do {
         if (neighborVerts.find(currhe2->twin->vertex->randid) != neighborVerts.end()){
             count++;
@@ -401,16 +405,16 @@ void Mesh::collapse(HE *halfedge, Vector3f cp, unordered_set<string> &skipEd){
 
     //check that normals won't flip for affected triangles
     if (!skip){
-        HE *currheb = B->halfedge;
+        shared_ptr<HE> currheb = B->halfedge;
         do {
-            Face *f = currheb->face;
+            shared_ptr<Face> f = currheb->face;
             if (f==one || f==two){
                 currheb = currheb->twin->next;
                 continue;
             }
-            Vertex *v1 = currheb->vertex;
-            Vertex *v2 = currheb->next->vertex;
-            Vertex *v3 = currheb->next->next->vertex;
+            shared_ptr<Vertex> v1 = currheb->vertex;
+            shared_ptr<Vertex> v2 = currheb->next->vertex;
+            shared_ptr<Vertex> v3 = currheb->next->next->vertex;
             Vector3f AB = v2->position - v1->position;
             Vector3f AC = v3->position - v1->position;
             Vector3f normal = AB.cross(AC);
@@ -429,16 +433,16 @@ void Mesh::collapse(HE *halfedge, Vector3f cp, unordered_set<string> &skipEd){
     }
 
     if (!skip){
-        HE *currhed = D->halfedge;
+        shared_ptr<HE> currhed = D->halfedge;
         do {
-            Face *f = currhed->face;
+            shared_ptr<Face> f = currhed->face;
             if (f==one || f==two){
                 currhed = currhed->twin->next;
                 continue;
             }
-            Vertex *v1 = currhed->vertex;
-            Vertex *v2 = currhed->next->vertex;
-            Vertex *v3 = currhed->next->next->vertex;
+            shared_ptr<Vertex> v1 = currhed->vertex;
+            shared_ptr<Vertex> v2 = currhed->next->vertex;
+            shared_ptr<Vertex> v3 = currhed->next->next->vertex;
             Vector3f AB = v2->position - v1->position;
             Vector3f AC = v3->position - v1->position;
             Vector3f normal = AB.cross(AC);
@@ -466,32 +470,32 @@ void Mesh::collapse(HE *halfedge, Vector3f cp, unordered_set<string> &skipEd){
 
         //delete D, DC, DB, BD, CD, DA, AD, one, two, edCD, edDA, edDB
         _HEfaces.erase(one->randid);
-        delete one;
+//        delete one;
         _HEfaces.erase(two->randid);
-        delete two;
+//        delete two;
 
         _HEverts.erase(D->randid);
-        delete D;
+//        delete D;
 
         _edges.erase(edCD->randid);
-        delete edCD;
+//        delete edCD;
         _edges.erase(edDA->randid);
-        delete edDA;
+//        delete edDA;
         _edges.erase(edDB->randid);
-        delete edDB;
+//        delete edDB;
 
         _halfedges.erase(DB->randid);
-        delete DB;
+//        delete DB;
         _halfedges.erase(BD->randid);
-        delete BD;
+//        delete BD;
         _halfedges.erase(CD->randid);
-        delete CD;
+//        delete CD;
         _halfedges.erase(DA->randid);
-        delete DA;
+//        delete DA;
         _halfedges.erase(BC->randid);
-        delete BC;
+//        delete BC;
         _halfedges.erase(AB->randid);
-        delete AB;
+//        delete AB;
 
         CB->twin = DC;
         BA->twin = AD;
@@ -512,7 +516,7 @@ void Mesh::collapse(HE *halfedge, Vector3f cp, unordered_set<string> &skipEd){
         edBC->halfedge = CB;
         edAB->halfedge = BA;
 
-        HE *curr = DC;
+        shared_ptr<HE> curr = DC;
         curr = curr->next->next->twin;
         while (curr->next->next != AD){
             curr->vertex = B;
@@ -521,9 +525,9 @@ void Mesh::collapse(HE *halfedge, Vector3f cp, unordered_set<string> &skipEd){
         curr->vertex = B;
 
         //reset affected quadrics and cost
-        HE *currhe1 = B->halfedge;
+        shared_ptr<HE> currhe1 = B->halfedge;
         do {
-            Face *f = currhe1->face;
+            shared_ptr<Face> f = currhe1->face;
             setFaceQuadric(f);
             currhe1 = currhe1->twin->next;
         } while (currhe1 != B->halfedge);
@@ -535,10 +539,10 @@ void Mesh::collapse(HE *halfedge, Vector3f cp, unordered_set<string> &skipEd){
         setVertexQuadric(B);
 
         do {
-            Vertex *v = currhe1->twin->vertex;
-            HE *vcurr = v->halfedge;
+            shared_ptr<Vertex> v = currhe1->twin->vertex;
+            shared_ptr<HE> vcurr = v->halfedge;
             do {
-                Edge *e = vcurr->edge;
+                shared_ptr<Edge> e = vcurr->edge;
                 setEdgeQuadric(e);
                 vcurr = vcurr->twin->next;
             } while (vcurr != v->halfedge);
@@ -552,11 +556,11 @@ void Mesh::collapse(HE *halfedge, Vector3f cp, unordered_set<string> &skipEd){
     }
 }
 
-void Mesh::setFaceQuadric(Face *f){
+void Mesh::setFaceQuadric(shared_ptr<Face> f){
     //build quadric matrix for each face
-    Vertex *v1 = f->halfedge->vertex;
-    Vertex *v2 = f->halfedge->next->vertex;
-    Vertex *v3 = f->halfedge->next->next->vertex;
+    shared_ptr<Vertex> v1 = f->halfedge->vertex;
+    shared_ptr<Vertex> v2 = f->halfedge->next->vertex;
+    shared_ptr<Vertex> v3 = f->halfedge->next->next->vertex;
     Vector3f AB = v2->position - v1->position;
     Vector3f AC = v3->position - v1->position;
     Vector3f normal = AB.cross(AC);
@@ -576,9 +580,9 @@ void Mesh::setFaceQuadric(Face *f){
     f->q = q;
 }
 
-void Mesh::setVertexQuadric(Vertex *v){
+void Mesh::setVertexQuadric(shared_ptr<Vertex> v){
     // quadric for each vertex = sum of quadrics at all adjacent faces
-    HE *currhe = v->halfedge;
+    shared_ptr<HE> currhe = v->halfedge;
     Matrix4f quadric = Matrix4f::Zero();
     do {
         quadric += currhe->face->q;
@@ -587,7 +591,7 @@ void Mesh::setVertexQuadric(Vertex *v){
     v->q = quadric;
 }
 
-void Mesh::setEdgeQuadric(Edge *e){
+void Mesh::setEdgeQuadric(shared_ptr<Edge> e){
     // quadric for each edge = sum of quadrics at 2 endpoint vertices
     Matrix4f quad = e->halfedge->vertex->q;
     quad += e->halfedge->twin->vertex->q;
@@ -607,15 +611,15 @@ void Mesh::setEdgeQuadric(Edge *e){
 
 void Mesh::setQuadrics(){
     for (auto it = _HEfaces.begin(); it != _HEfaces.end(); ++it ){
-        Face *f = it->second;
+        shared_ptr<Face> f = it->second;
         setFaceQuadric(f);
     }
     for (auto it = _HEverts.begin(); it != _HEverts.end(); ++it ){
-        Vertex *v = it->second;
+        shared_ptr<Vertex> v = it->second;
         setVertexQuadric(v);
     }
     for (auto it = _edges.begin(); it != _edges.end(); ++it ){
-        Edge *e = it->second;
+        shared_ptr<Edge> e = it->second;
         setEdgeQuadric(e);
     }
 }
@@ -628,14 +632,14 @@ void Mesh::simplify(int faces){
     std::unordered_set<string> skipEd = {};
 
     while(_HEfaces.size() > target){
-        priority_queue<Edge*, std::vector<Edge*>, costCompare> costs;
+        priority_queue<shared_ptr<Edge>, std::vector<shared_ptr<Edge>>, costCompare> costs;
         for (auto it = _edges.begin(); it != _edges.end(); ++it ){
-            Edge *e = it->second;
+            shared_ptr<Edge> e = it->second;
             if (skipEd.find(e->randid) == skipEd.end()){
                 costs.push(e);
             }
         }
-        Edge *top = costs.top();
+        shared_ptr<Edge> top = costs.top();
         //collapse cheapest edge, set quadric at new vertex to sum of quadrics at endpoints of original edge
         collapse(top->halfedge, top->collapsepoint, skipEd);
         count++;
@@ -647,44 +651,44 @@ void Mesh::simplify(int faces){
 }
 
 void Mesh::subdivide(){
-    std::vector<Edge*> newedges;
-    std::vector<Edge*> edgecopy;
-    std::unordered_map<std::string, Vertex*> oldverts;
+    std::vector<shared_ptr<Edge>> newedges;
+    std::vector<shared_ptr<Edge>> edgecopy;
+    std::unordered_map<std::string, shared_ptr<Vertex>> oldverts;
     std::unordered_map<std::string, Vector3f> newpos;
     for (auto it = _HEverts.begin(); it != _HEverts.end(); ++it ){
-        Vertex *v = it->second;
+        shared_ptr<Vertex> v = it->second;
         newpos[v->randid] = adjustPos(v);
         oldverts[v->randid] = v;
     }
 
     for (auto it = _edges.begin(); it != _edges.end(); ++it ){
-        Edge *e = it->second;
+        shared_ptr<Edge> e = it->second;
         edgecopy.push_back(e);
     }
 
-    for(Edge *e : edgecopy){
+    for(shared_ptr<Edge> e : edgecopy){
         split(e->halfedge, newedges, oldverts);
     }
-    for (Edge *e : newedges){
+    for (shared_ptr<Edge> e : newedges){
         flip(e->halfedge);
     }
     for (auto it = newpos.begin(); it != newpos.end(); ++it ){
-        Vertex *curr = oldverts[it->first];
+        shared_ptr<Vertex> curr = oldverts[it->first];
         curr->position = it->second;
     }
     edgecopy.clear();
 }
 
-Vector3f Mesh::denoisePoint(Vertex *v, float s_c, float s_s, float kernel){
+Vector3f Mesh::denoisePoint(shared_ptr<Vertex> v, float s_c, float s_s, float kernel, int depth){
     Vector3f normal = getVertexNormal(v);
     std::unordered_set<string> neighbors = {};
-    getNeighborSet(v, neighbors, v->position, 0, kernel);
+    getNeighborSet(v, neighbors, v->position, 0, kernel, depth);
     neighbors.erase(v->randid);
     int K = neighbors.size();
     float sum = 0;
     float normalizer = 0;
     for (auto it = neighbors.begin(); it != neighbors.end(); ++it){
-        Vertex *curr = _HEverts[*it];
+        shared_ptr<Vertex> curr = _HEverts[*it];
         float t = (v->position - curr->position).norm();
         float h = normal.dot(curr->position - v->position);
         float w_c = exp(-pow(t, 2)/(2*pow(s_c, 2)));
@@ -699,21 +703,21 @@ Vector3f Mesh::denoisePoint(Vertex *v, float s_c, float s_s, float kernel){
     return out;
 }
 
-void Mesh::denoise(float s_c, float s_s, float kernel){
+void Mesh::denoise(float s_c, float s_s, float kernel, int depth){
     std::unordered_map<std::string, Vector3f> newpos;
     for (auto it = _HEverts.begin(); it != _HEverts.end(); ++it ){
-        Vertex *v = it->second;
-        newpos[v->randid] = denoisePoint(v, s_c, s_s, kernel);
+        shared_ptr<Vertex> v = it->second;
+        newpos[v->randid] = denoisePoint(v, s_c, s_s, kernel, depth);
     }
     for (auto it = newpos.begin(); it != newpos.end(); ++it ){
-        Vertex *curr = _HEverts[it->first];
+        shared_ptr<Vertex> curr = _HEverts[it->first];
         curr->position = it->second;
     }
 }
 
 void Mesh::createNoisySphere(){
     for (auto it = _HEverts.begin(); it != _HEverts.end(); ++it ){
-        Vertex *v = it->second;
+        shared_ptr<Vertex> v = it->second;
         Vector3f normal = getVertexNormal(v);
         float r = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/0.1f));
         v->position += normal*r;
@@ -726,12 +730,12 @@ void Mesh::convertToOBJ(){
     int count = 0;
     for (auto it = _HEfaces.begin(); it != _HEfaces.end(); ++it){
         count += 1;
-        Face *f = it->second;
+        shared_ptr<Face> f = it->second;
         std::vector<int> idx;
         idx.reserve(3);
-        HE *currhe = f->halfedge;
+        shared_ptr<HE> currhe = f->halfedge;
         do {
-            Vertex *v = currhe->vertex; //hash unique id for vertex to vertex's new index
+            shared_ptr<Vertex> v = currhe->vertex; //hash unique id for vertex to vertex's new index
             if (_lastmap.find(v->randid) == _lastmap.end()){
                 Vector3f position = v->position;
                 if (abs(position[0]) < 0.0001){
@@ -758,13 +762,13 @@ void Mesh::convertToOBJ(){
     }
 }
 
-Vector3f Mesh::adjustPos(Vertex *v){
+Vector3f Mesh::adjustPos(shared_ptr<Vertex> v){
     Vector3f adjust(0,0,0);
     int vd = v->degree;
-    HE *currhe = v->halfedge;
+    shared_ptr<HE> currhe = v->halfedge;
     int count = 0;
     do {
-        Vertex *currv = currhe->twin->vertex;
+        shared_ptr<Vertex> currv = currhe->twin->vertex;
         if (vd == 3){
             adjust += 3.f/16.f * currv->position;
         } else {
@@ -804,8 +808,8 @@ std::string Mesh::random_string(){
 }
 
 
-int Mesh::getNumNeighbors(Vertex *v){
-    HE *currhe = v->halfedge;
+int Mesh::getNumNeighbors(shared_ptr<Vertex> v){
+    shared_ptr<HE> currhe = v->halfedge;
     int count = 0;
     do {
         currhe = currhe->twin->next;
@@ -814,15 +818,15 @@ int Mesh::getNumNeighbors(Vertex *v){
     return count;
 }
 
-Vector3f Mesh::getVertexNormal(Vertex *v){
-    HE *currhe = v->halfedge;
+Vector3f Mesh::getVertexNormal(shared_ptr<Vertex> v){
+    shared_ptr<HE> currhe = v->halfedge;
     Vector3f bigNormal(0,0,0);
     int numFaces = 0;
     do {
-        Face *f = currhe->face;
-        Vertex *v1 = currhe->vertex;
-        Vertex *v2 = currhe->next->vertex;
-        Vertex *v3 = currhe->next->next->vertex;
+        shared_ptr<Face> f = currhe->face;
+        shared_ptr<Vertex> v1 = currhe->vertex;
+        shared_ptr<Vertex> v2 = currhe->next->vertex;
+        shared_ptr<Vertex> v3 = currhe->next->next->vertex;
         Vector3f AB = v2->position - v1->position;
         Vector3f AC = v3->position - v1->position;
         Vector3f normal = AB.cross(AC);
@@ -834,8 +838,8 @@ Vector3f Mesh::getVertexNormal(Vertex *v){
     return bigNormal/numFaces;
 }
 
-void Mesh::getNeighborSet(Vertex *v, unordered_set<string> &neighbors, Vector3f pos, int depth, float kernel){
-    HE *currhe = v->halfedge;
+void Mesh::getNeighborSet(shared_ptr<Vertex> v, unordered_set<string> &neighbors, Vector3f pos, int depth, float kernel, int maxdepth){
+    shared_ptr<HE> currhe = v->halfedge;
     do {
         //euclidean distance
         float x = pos[0] - currhe->twin->vertex->position[0];
@@ -848,7 +852,7 @@ void Mesh::getNeighborSet(Vertex *v, unordered_set<string> &neighbors, Vector3f 
         if (dist > 0.f && dist < kernel){
             neighbors.insert(currhe->twin->vertex->randid);
             if (depth < 3){
-                getNeighborSet(currhe->twin->vertex, neighbors, pos, depth+1, kernel);
+                getNeighborSet(currhe->twin->vertex, neighbors, pos, depth+1, kernel, maxdepth);
             }
         }
         currhe = currhe->twin->next;

@@ -52,6 +52,7 @@ int main(int argc, char *argv[])
     float s_c;
     float s_s;
     float kernel;
+    int depth;
 
     if (args.size() == 3){
         iter = 1;
@@ -60,9 +61,16 @@ int main(int argc, char *argv[])
         iter = args[3].toInt();
     }
     if(args.size() > 4){
+        if (args.size() != 8 || args.size() > 8){
+            cerr << "Error: Wrong number of arguments" << endl;
+            a.exit(1);
+            return 1;
+        }
+        iter = args[3].toInt();
         s_c = args[4].toFloat();
         s_s = args[5].toFloat();
         kernel = args[6].toFloat();
+        depth = args[7].toInt();
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -84,9 +92,8 @@ int main(int argc, char *argv[])
         m.simplify(iter);
     } else if (method == "remesh"){
     } else if (method == "denoise") {
-//        m.createNoisySphere(); //this was used to create a noisy sphere for testing
         for (int i = 0; i < iter; i++){
-            m.denoise(s_c, s_s, kernel);
+            m.denoise(s_c, s_s, kernel, depth);
         }
     } else {
         cerr << "Error: Unknown method name" << endl;
