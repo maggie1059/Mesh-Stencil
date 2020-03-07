@@ -8,8 +8,9 @@ To run my code, please write command line arguments in the following order:
 -sigma_c
 -sigma_s
 -kernel size
+-depth
 
-The last 4 arguments are optional. If no "number of iterations" is provided, it will default to 1 for all methods. The last three arguments are used for denoising.
+The last 5 arguments are optional. If no "number of iterations" is provided, it will default to 1 for all methods. The last four arguments are used for denoising.
 
 My submitted images are in the "final images" folder in the root directory. All are shown with wireframes. The corresponding obj files are in the "final objs" folder. These are the images and arguments for each method for those images:
 
@@ -31,8 +32,9 @@ Denoising (with and without wireframe):
 		fandisk_denoised, fandisk_denoise_wireframe
 		
 2) input: noisy_hi_bunny.obj (noisy_hi_bunny_orig, noisy_hi_bunny_orig_wireframe)
-	output: (3 iterations, s_c=0.01, s_s=10, kernel_size=0.2, depth=4)
+	output: (3 iterations, s_c=0.01, s_s=10, kernel_size=0.02, depth=4)
 		noisy_hi_bunny_denoised, noisy_hi_bunny_denoised_wireframe
+		denoised_bunny_dept (2 iterations, s_c=0.01, s_s=10, kernel_size=0.02, depth=3)
 
 
 Data structures:
@@ -43,4 +45,4 @@ For subdivision to run in linear time, both split() and flip() were implemented 
 
 Simplification was implemented using the collapse() method, which also runs in linear time with constant operations on a single halfedge, using reassignments of pointers within structs. However, there are a lot more error-checking conditions in collapse(), which does make it run slower. For example, I check if a collapse is valid by checking if each endpoint of the collapsing edge has more than 2 neighbors, and by checking if any triangles will flip normals as a result of the collapse, and only proceed if neither of these is true. At the end, I also traverse all affected vertices/edges/faces to update their quadric errors and the cost of edges. I store the costs in a priority queue to find the best edge to collapse (avoiding putting edges that shouldn't be collapsed into the pq), which brings the total runtime to O(n^2) after the number of faces desired is reached.
 
-For denoising, I used a set to keep track of all neighbors within the kernel-size distance from the current vertex, and finding these neighbors happens in constant time (linear for full mesh). Then, constant operations are performed on all those neighbors before a vertex's position is adjusted. This results in linear runtime for the full mesh.
+For denoising, I used a set to keep track of all neighbors within the kernel-size distance from the current vertex, and finding these neighbors happens in constant time (linear for full mesh). This uses the depth argument to recurse into a neighbor's neighbors if they are still within the kernel size. Then, constant operations are performed on all those neighbors before a vertex's position is adjusted. This results in linear runtime for the full mesh.

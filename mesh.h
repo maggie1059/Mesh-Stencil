@@ -8,6 +8,7 @@
 #include <functional>
 #include <Eigen/Geometry>
 #include <unordered_set>
+#include <memory>
 
 #include <string>
 #include <utility>
@@ -96,11 +97,6 @@ private:
     std::vector<Eigen::Vector3i> _faces;
 
     std::unordered_set<string> usedids = {};
-
-//    std::unordered_map<std::string, HE*> _halfedges;
-//    std::unordered_map<std::string, Vertex*> _HEverts;
-//    std::unordered_map<std::string, Edge*> _edges;
-//    std::unordered_map<std::string, Face*> _HEfaces;
 
     std::unordered_map<std::string, shared_ptr<HE>> _halfedges;
     std::unordered_map<std::string, shared_ptr<Vertex>> _HEverts;
